@@ -1,0 +1,52 @@
+<div [@routerTransition]>
+    <h3 class="text-muted">Rasta Route : <small>Aplikasi Penentuan Rute Distribusi Rastra berdasarkan Algoritma Genetika</small></h3>
+    <div class="row">
+        <div class="col-md-12">
+            <ngb-carousel>
+                <ng-template ngbSlide *ngFor="let slider of sliders">
+                    <img class="img-fluid mx-auto d-block" [src]="slider.imagePath" alt="Random first slide" width="100%">
+                    <div class="carousel-caption">
+                        <h3>{{slider.label}}</h3>
+                        <p>{{slider.text}}</p>
+                    </div>
+                </ng-template>
+            </ngb-carousel>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-xl-3 col-lg-6">
+            <app-stat [bgClass]="'primary'" [icon]="'fa-file'"  [label]="'Menu Data'" 
+            [modalId]="'modala'"
+            [modalTitle]="'Menu Data'" 
+            [modalBody]="'Menu yang digunakan untuk menginputkan data berupa kuota dan tanggal Rastra  diantarkan untuk masing-masing kelurahan di Mojokerto-Jombang dengan mengupload file excel'"
+            ></app-stat>
+        </div>
+        <div class="col-xl-3 col-lg-6">
+            <app-stat [bgClass]="'warning'" [icon]="'fa-truck'"  [label]="'Menu Hasil Rute'" 
+            [modalId]="'modalb'"
+            [modalTitle]="'Menu Hasil Rute'" 
+            [modalBody]="'Menu yang digunakan untuk melakukan perhitungan dengan Algoritma Genetika untuk menghasilkan susunan rute pendistribusian Rastra ke kelurahan Mojokerto-Jombang dan menampilkannya dalam tabel yang dapat diexport ke dalam file excel dengan menu download'"
+            ></app-stat>
+        </div>
+        <div class="col-xl-3 col-lg-6">
+            <app-stat [bgClass]="'success'" [icon]="'fa-gear'"  [label]="'Menu Pengaturan'" 
+            [modalId]="'modalc'"
+            [modalTitle]="'Menu Pengaturan'" 
+            [modalBody]="'Menu yang digunakan untuk merubah data stok dan kapasitas gudang di Mojokerto-Jombang yang menjadikan constraint bagi algoritma dalam menentukan rutenya'"
+            ></app-stat>
+        </div>
+        <div class="col-xl-3 col-lg-6">
+            <app-stat [bgClass]="'danger'" [icon]="'fa-info'"  [label]="'Tentang Rastra Route'"
+            [modalId]="'modald'"
+            [modalTitle]="'Tentang Rastra Route'" 
+            [modalBody]="'Rastra Route adalah Aplikasi Pendukung Keputusan dalam menentukan susunan rute pendistribusian Rastra ke kelurahan di Mojokerto-Jombang dengan menggunakan Algoritma Genetika untuk menyelesaikan MDSDVRP'"
+            ></app-stat>
+        </div>
+    </div>
+   
+    
+</div>
+
+
+

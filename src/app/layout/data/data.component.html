@@ -1,0 +1,47 @@
+
+
+<div [@routerTransition]>
+    
+    <app-page-header [heading]="'Data'" [icon]="'fa-table'"> </app-page-header>
+    
+
+     <div class="card mb-3" >
+         <div class="row" style="padding:10px">
+        <div class="col-sm-7" >
+            <div class="card-header" style="background-color: white;border-bottom-color: white">
+                    <h5>Data Kuota Rastra Jombang-Mojokerto</h5>
+                </div>
+        </div>
+        <div class="col-sm-5" >
+            <div class="row" >
+                <div class="col-sm-8" >
+                     <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="validatedCustomFile" (change)="uploadData($event)" required>
+                        <label class="custom-file-label" for="validatedCustomFile">Choose file...</label>
+                        <div class="invalid-feedback">Example invalid custom file feedback</div>
+                    </div>
+                </div>
+                <div class="col-sm-4" >
+                   <a  href="https://drive.google.com/open?id=1xTLPne4i1YhQ-CEF1zmxtHaziJG_1YOR" target="_blank" ><button type="button" style="width:100%;font-size: 100%" class="btn btn-secondary">Sample XLSX</button></a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+                
+    <jqxDataTable [width]="'100%'" [columnsResize]="true" [columns]="columns" [selectionMode]="'singleRow'" [altRows]="true" [sortable]="true" [editable]="false" [pageable]="true" [filterable]="true"
+    [pagerButtonsCount]="10" [filterMode]="'simple'" [source]="dataAdapter"  >
+    
+</jqxDataTable>
+     </div>
+
+
+    
+           
+                
+            
+            
+           
+       
+</div>
+

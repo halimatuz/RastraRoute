@@ -1,0 +1,38 @@
+<div class="card text-white bg-{{bgClass}}">
+    <div class="card-header">
+        <div class="row">
+            <div class="col col-xs-3">
+                <i class="fa {{icon}} fa-5x"></i>
+            </div>
+            <div class="col col-xs-9 text-right">
+                <div class="d-block huge">{{count}}</div>
+                <div class="d-block">{{label}}</div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <span class="float-left">View Details  {{data}}</span>
+        <a data-toggle="modal" [attr.data-target]="'#' + modalId" class="float-right card-inverse">
+            <span ><i class="fa fa-arrow-circle-right"></i></span>
+        </a>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="{{modalId}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content" >
+      <div class="modal-header" >
+        <h5 class="modal-title" id="exampleModalLongTitle">{{modalTitle}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" >
+        <p>{{modalBody}}</p>
+      </div>
+      
+    </div>
+  </div>
+</div>

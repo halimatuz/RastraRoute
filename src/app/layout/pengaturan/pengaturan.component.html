@@ -1,0 +1,103 @@
+
+
+<div [@routerTransition]>
+    
+    <app-page-header [heading]="'Pengaturan'" [icon]="'fa-table'"> </app-page-header>
+    
+
+     
+       
+        
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="card mb-3" >
+         <div class="card-body table-responsive">
+            <div class="card-header" style="background-color: white;border-bottom-color: white">
+                    <h5>Kapasitas Gudang</h5>
+                </div>
+                    <table class="table table-striped" style="size: 100%;padding:10px" >
+                        <thead>
+                            <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Nama Gudang</th>
+                            <th scope="col">Kapasitas</th>
+                            <th scope="col">Stok</th>
+                             <th scope="col">Edit</th>
+                              <th scope="col">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of gudangList; index as i">
+                            <th  scope="row">{{ i+1}}</th>
+                            <td>{{item.namaGudang}}</td>
+                            <td>{{item.kapasitas}}</td>
+                            <td>{{item.stok}}</td>
+                            <td>
+                                <a class="btn" (click)="onEdit(item)">
+                                <i class="fa fa-pencil-square-o"></i>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn" (click)="onDelete(item.$key)">
+                                <i class="fa fa-trash-o"></i>
+                                </a>
+                            </td>
+                            </tr>
+                            <tr>
+                            
+                        </tbody>
+                        </table>
+         </div>
+                </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card mb-3" >
+         
+                        <div class="card-header" style="background-color: white;border-bottom-color: white">
+                                <h5>Form Kapasitas Gudang</h5>
+                         </div>
+
+                          <form #gudangForm="ngForm" (ngSubmit)="onSubmit(gudangForm)" style="padding: 10px">
+                                 <input type="hidden" name="$key" #$key="ngModel" [(ngModel)]="gudangService.selectedGudang.$key">
+
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"  id="basic-addon1">Gudang :</span>
+                                    </div>
+                                    <input type="text" class="form-control" name="namaGudang" #namaGudang="ngModel" [(ngModel)]="gudangService.selectedGudang.namaGudang" placeholder="Nama Gudang">
+                                </div>
+
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Kapasitas :</span>
+                                    </div>
+                                    <input type="number" class="form-control" name="kapasitas" #kapasitas="ngModel" [(ngModel)]="gudangService.selectedGudang.kapasitas" placeholder="Kapasitas Gudang">
+                                </div>
+
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Stok :</span>
+                                    </div>
+                                    <input type="number" class="form-control" name="stok" #stok="ngModel" [(ngModel)]="gudangService.selectedGudang.stok" placeholder="Stok Gudang">
+                                </div>
+
+                                 <button style="width:100%;font-size: 100%" type="submit" class="btn btn-secondary">Submit</button>
+
+                            </form>
+                    </div>
+                </div>
+            </div>
+                
+    
+     
+
+
+    
+           
+                
+            
+            
+           
+       
+</div>
+

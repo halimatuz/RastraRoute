@@ -1,0 +1,169 @@
+
+
+<div [@routerTransition]>
+    
+    <app-page-header [heading]="'Hasil Rute'" [icon]="'fa-table'"> </app-page-header>
+
+     <div class="card mb-3" >
+         <div class="row" style="padding:10px">
+        <div class="col-sm-7" >
+            <div class="card-header" style="background-color: white;border-bottom-color: white">
+                    <h5>Hasil Rute Distribusi Rastra Jombang-Mojokerto</h5>
+                </div>
+        </div>
+        <div class="col-sm-5" >
+            <div class="row" >
+                <div class="col-sm-8" >
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="inputGroupSelect01">Gudang :</label>
+                        </div>
+                        <select class="custom-select" id="inputGroupSelect01">
+                            <option selected>All</option>
+                            <option value="1">One</option>
+                            <option value="2">Two</option>
+                            <option value="3">Three</option>
+                        </select>
+                        </div>
+                </div>
+                <div class="col-sm-4" >
+                    <button style="width:100%;font-size: 100%" type="submit" class="btn btn-secondary">Download</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+                
+    <jqxDataTable [width]="'100%'" [columnsResize]="true" [columns]="columns" [selectionMode]="'singleRow'" [altRows]="true" [sortable]="true" [editable]="false" [pageable]="true" [filterable]="true"
+    [pagerButtonsCount]="10" [filterMode]="'simple'" >
+    <table id='table' border='1'>
+        <thead>
+            <tr>
+                <th align='left'>First Name</th>
+                <th align='left'>Last Name</th>
+                <th align='left'>Product</th>
+                <th align='right'>Price</th>
+                <th align='right'>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Ian</td>
+                <td>Devling</td>
+                <td>Espresso Truffle</td>
+                <td>$1.75</td>
+                <td>8</td>
+            </tr>
+            <tr>
+                <td>Nancy</td>
+                <td>Wilson</td>
+                <td>Cappuccino</td>
+                <td>$5.00</td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td>Cheryl</td>
+                <td>Nodier</td>
+                <td>Caffe Americano</td>
+                <td>$2.50</td>
+                <td>4</td>
+            </tr>
+            <tr>
+                <td>Martin</td>
+                <td>Saavedra</td>
+                <td>Caramel Latte</td>
+                <td>$3.80</td>
+                <td>11</td>
+            </tr>
+            <tr>
+                <td>Guylene</td>
+                <td>Bjorn</td>
+                <td>Green Tea</td>
+                <td>$1.50</td>
+                <td>8</td>
+            </tr>
+            <tr>
+                <td>Andrew</td>
+                <td>Burke</td>
+                <td>Caffe Espresso</td>
+                <td>$3.00</td>
+                <td>2</td>
+            </tr>
+            <tr>
+                <td>Regina</td>
+                <td>Murphy</td>
+                <td>White Chocolate Mocha</td>
+                <td>$3.60</td>
+                <td>6</td>
+            </tr>
+            <tr>
+                <td>Michael</td>
+                <td>Murphy</td>
+                <td>Caramel Latte</td>
+                <td>$3.80</td>
+                <td>2</td>
+            </tr>
+            <tr>
+                <td>Petra</td>
+                <td>Bein</td>
+                <td>Caffe Americano</td>
+                <td>$2.50</td>
+                <td>7</td>
+            </tr>
+            <tr>
+                <td>Nancy</td>
+                <td>Nodier</td>
+                <td>Caffe Latte</td>
+                <td>$4.50</td>
+                <td>10</td>
+            </tr>
+            <tr>
+                <td>Peter</td>
+                <td>Devling</td>
+                <td>Green Tea</td>
+                <td>$1.50</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td>Beate</td>
+                <td>Saylor</td>
+                <td>Espresso con Panna</td>
+                <td>$3.25</td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td>Shelley</td>
+                <td>Nodier</td>
+                <td>Peppermint Mocha Twist</td>
+                <td>$4.00</td>
+                <td>7</td>
+            </tr>
+            <tr>
+                <td>Nancy</td>
+                <td>Murphy</td>
+                <td>Peppermint Mocha Twist</td>
+                <td>$4.00</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td>Lars</td>
+                <td>Wilson</td>
+                <td>Caffe Espresso</td>
+                <td>$3.00</td>
+                <td>11</td>
+            </tr>
+        </tbody>
+    </table>
+</jqxDataTable>
+     </div>
+
+
+    
+           
+                
+            
+            
+           
+       
+</div>
+
