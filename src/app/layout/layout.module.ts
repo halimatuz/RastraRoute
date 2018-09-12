@@ -8,13 +8,10 @@ import { LayoutComponent } from './layout.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { HeaderComponent } from './components/header/header.component';
 
-import { jqxBarGaugeComponent } from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxbargauge';
 import { jqxDataTableComponent} from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxdatatable';
-import { jqxFileUploadComponent } from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxfileupload';
-
 
 import { FormsModule} from '@angular/forms';
-import { ToastrModule } from 'ngx-toastr';
+
 
 @NgModule({
     imports: [
@@ -23,21 +20,17 @@ import { ToastrModule } from 'ngx-toastr';
         TranslateModule,
         NgbDropdownModule.forRoot(),
         
-        ToastrModule.forRoot()
+       
     ],
     declarations: [
         LayoutComponent, 
         SidebarComponent, 
         HeaderComponent,
-        jqxBarGaugeComponent,
-        jqxDataTableComponent,
-        jqxFileUploadComponent
+        jqxDataTableComponent
         ],
     exports: [
-        jqxBarGaugeComponent,
         jqxDataTableComponent,
-        jqxFileUploadComponent,
-        FormsModule,
+        FormsModule
         
         
         

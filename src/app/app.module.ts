@@ -14,6 +14,13 @@ import { AngularFireModule } from 'angularfire2';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { environment } from '../environments/environment';
 
+import { AngularFireAuthModule } from 'angularfire2/auth';
+import { AngularFirestoreModule } from 'angularfire2/firestore';
+import { AuthService } from './shared/guard/auth.service';
+import { UserResolver } from './shared/guard/user.resolver';
+import { UserService } from './shared/guard/user.service';
+import { ToastrModule } from 'ngx-toastr';
+
 
 
 // AoT requires an exported function for factories
@@ -43,6 +50,10 @@ export const createTranslateLoader = (http: HttpClient) => {
         AppRoutingModule,
         AngularFireModule.initializeApp(environment.firebaseConfig),
         AngularFireDatabaseModule,
+        AngularFireAuthModule,
+        AngularFirestoreModule,
+         ToastrModule.forRoot()
+        
         
         
     ],
@@ -50,7 +61,10 @@ export const createTranslateLoader = (http: HttpClient) => {
         AppComponent, 
         
         ],
-    providers: [AuthGuard],
-    bootstrap: [AppComponent]
+    providers: [AuthGuard,AuthService, UserService, UserResolver,],
+    bootstrap: [AppComponent],
+    exports:[
+        
+    ]
 })
 export class AppModule {}

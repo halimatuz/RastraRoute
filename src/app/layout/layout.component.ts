@@ -9,7 +9,7 @@ import { RastraService } from '../shared/services/rastra/rastra.service';
     providers :[GudangService, RastraService]
 })
 export class LayoutComponent implements OnInit {
-    constructor(private gudangService : GudangService,private rastraService : RastraService) {}
+    constructor(private gudangService : GudangService, private rastraService : RastraService) {}
 
     ngOnInit() {}
 }

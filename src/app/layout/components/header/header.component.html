@@ -7,18 +7,18 @@
 
 
     
-    <div class="collapse navbar-collapse">
+    <div  class="collapse navbar-collapse">
         <ul class="navbar-nav ml-auto">
             <li class="nav-item dropdown" ngbDropdown>
-                <a href="javascript:void(0)" class="nav-link" ngbDropdownToggle>
-                    <i class="fa fa-user"></i> Admin <b class="caret"></b>
+                <a  class="nav-link" ngbDropdownToggle>
+                    <i class="fa fa-user"></i> {{user.name}}<b class="caret"></b>
                 </a>
                 <div class="dropdown-menu-right" ngbDropdownMenu >
                     <a [routerLink]="['/setting']" class="dropdown-item" >
                         <i class="fa fa-fw fa-gear"></i> {{ 'Settings' | translate }}
                     </a>
-                    <a class="dropdown-item" [routerLink]="['/login']" (click)="onLoggedout()">
-                        <i class="fa fa-fw fa-power-off"></i> {{ 'Log Out' | translate }}
+                    <a class="dropdown-item" (click)="onLoggedout()"  >
+                        <i class="fa fa-fw fa-power-off" ></i> {{ 'Log Out' | translate }}
                     </a>
                 </div>
             </li>

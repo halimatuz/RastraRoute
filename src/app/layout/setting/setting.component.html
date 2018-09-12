@@ -13,15 +13,15 @@
              </div>
 
              <div style="width:200px;height:200px;align-self:center;padding: 10px">
-            <img src="assets/images/logo.png" alt="Foto Profil" class="img-thumbnail">
+            <img src="{{user.image}}" alt="Foto Profil" class="img-thumbnail">
              </div>
 
 
             <div class="alert alert-secondary" role="alert" style="text-align: center;padding: 10px">
-            H52zzuhriyah@gmail.com
+            {{user.name}}
             </div>
 
-            <button style="width:100%;font-size: 100%" type="submit" class="btn btn-secondary">Edit</button>
+            <button style="width:100%;font-size: 100%" (click)="onViewEdit()" type="button" class="btn btn-secondary">Edit</button>
 
         </div>
         </div>
@@ -32,42 +32,32 @@
                                 <h5>Form Pengaturan Akun</h5>
                          </div>
 
-                          <form role="form" style="padding: 10px">
-
-
-                                <div class="form-group input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"  id="basic-addon1">Email :</span>
-                                    </div>
-                                    <input type="text" class="form-control" placeholder="Email">
-                                </div>
+                          <form   #userForm="ngForm" (ngSubmit)="onSubmit(userForm)" style="padding: 10px">
+                           
 
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text" id="basic-addon1">Password :</span>
+                                        <span class="input-group-text"  id="basic-addon1">Username :</span>
                                     </div>
-                                    <input type="text" class="form-control" placeholder="Password">
+                                    <input type="text" class="form-control" name="name" #name="ngModel" [(ngModel)]="username"  placeholder="Username">
                                 </div>
 
-                                <div class="form-group input-group">
+                                <div *ngIf='user.provider == "password"' class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">New-Password :</span>
+                                    </div>
+                                    <input type="password" class="form-control" name="pass1" #pass1="ngModel"  [(ngModel)]="pass_1" placeholder="New Password">
+                                </div>
+
+                                <div  *ngIf='user.provider == "password"' class="form-group input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" id="basic-addon1">Re-Password :</span>
                                     </div>
-                                    <input type="text" class="form-control" placeholder="Retype Password">
+                                    <input type="password" class="form-control" name="pass2" #pass2="ngModel"  [(ngModel)]="pass_2" placeholder="Retype Password">
                                 </div>
-                                
+                            
 
-                                <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="inputGroupFileAddon01">Foto :</span>
-                                </div>
-                                <div class="custom-file">
-                                    <input type="file" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
-                                    <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
-                                </div>
-                                </div>
-
-
+                                    <label class="error">{{err_m}}</label>
                                  <button style="width:100%;font-size: 100%" type="submit" class="btn btn-secondary">Submit</button>
 
                             </form>

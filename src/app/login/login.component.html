@@ -2,21 +2,25 @@
     <div class="row justify-content-md-center">
         <div class="col-md-4">
             <img src="assets/images/logo.png" width="150px" class="user-avatar" />
-            <h1>SB Admin BS4 Angular5</h1>
-            <form role="form">
+            <h1>Rastra Route</h1>
+            <form  [formGroup]="loginForm" style="padding:10px">
                 <div class="form-content">
                     <div class="form-group">
-                        <input type="text" ng-model="name" class="form-control input-underline input-lg" id="" placeholder="Email">
+                        <input type="text" formControlName="email"  class="form-control input-underline input-lg" id="email" placeholder="Email">
                     </div>
 
                     <div class="form-group">
-                        <input type="password" class="form-control input-underline input-lg" id="" placeholder="Password">
+                        <input type="password"  formControlName="password" class="form-control input-underline input-lg" id="pass" placeholder="Password">
                     </div>
+                    <label class="error">{{errorMessage}}</label>
                 </div>
-                <a class="btn rounded-btn" [routerLink]="['/dashboard']" (click)="onLoggedin()"> Log in </a>
-                &nbsp;
-                <a class="btn rounded-btn" [routerLink]="['/signup']">Register</a>
+                <button class="btn rounded-btn" type="submit" (click)="tryLogin(loginForm.value)">Login</button>
+             
+               
             </form>
+              <button class="btn rounded-btn" type="button" (click)="tryGoogleLogin()">Login With Google</button> 
+        
+           
         </div>
     </div>
 </div>

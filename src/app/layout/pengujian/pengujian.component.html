@@ -1,0 +1,104 @@
+
+
+<div [@routerTransition]>
+    
+    <app-page-header [heading]="'Pengujian'" [icon]="'fa-table'"> </app-page-header>
+    
+
+     
+       
+        
+            <div class="row">
+                
+                <div class="col-sm-4">
+                    <div class="card mb-3" >
+         
+                        <div class="card-header" style="background-color: white;border-bottom-color: white">
+                                <h5>Form Pengujian GA</h5>
+                         </div>
+
+                          <form #ujiForm="ngForm" (ngSubmit)="onSubmit(ujiForm)" style="padding: 10px">
+                                
+
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"  id="basic-addon1">Iterasi :</span>
+                                    </div>
+                                    <input type="number" class="form-control" name="iterasi" #iterasi="ngModel" [(ngModel)]="num_iterasi" placeholder="Nama Gudang">
+                                </div>
+
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Pcrossover :</span>
+                                    </div>
+                                    <input type="number" class="form-control" name="pc" #pc="ngModel" [(ngModel)]="prob_crossover" placeholder="Probabilitas Crossover">
+                                </div>
+
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Pmutation :</span>
+                                    </div>
+                                    <input type="number" class="form-control" name="pm" #pm="ngModel" [(ngModel)]="prob_mutation" placeholder="Probabilitas Mutation">
+                                </div>
+
+                                 <button style="width:100%;font-size: 100%" type="submit" class="btn btn-secondary">Submit</button>
+
+                            </form>
+                    </div>
+                </div>
+                <div class="col-sm-8">
+                    <div class="card mb-3" >
+         <div class="card-body table-responsive">
+            <div class="card-header" style="background-color: white;border-bottom-color: white">
+                    <h5>Hasil Rute</h5>
+                </div>
+                    <table class="table table-striped" style="size: 100%;padding:10px" >
+                        <thead>
+                            <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Nama Gudang</th>
+                            <th scope="col">Kapasitas</th>
+                            <th scope="col">Stok</th>
+                             <th scope="col">Edit</th>
+                              <th scope="col">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of gudangList; index as i">
+                            <th  scope="row">{{ i+1}}</th>
+                            <td>{{item.namaGudang}}</td>
+                            <td>{{item.kapasitas}}</td>
+                            <td>{{item.stok}}</td>
+                            <td>
+                                <a class="btn" (click)="onEdit(item)">
+                                <i class="fa fa-pencil-square-o"></i>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn" (click)="onDelete(item.$key)">
+                                <i class="fa fa-trash-o"></i>
+                                </a>
+                            </td>
+                            </tr>
+                            <tr>
+                            
+                        </tbody>
+                        </table>
+         </div>
+                </div>
+                </div>
+            </div>
+                
+    
+     
+
+
+    
+           
+                
+            
+            
+           
+       
+</div>
+

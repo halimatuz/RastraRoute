@@ -3,7 +3,7 @@ import { routerTransition } from '../../router.animations';
 import { GudangService } from '../../shared/services/gudang/gudang.service';
 import { Gudang } from '../../shared/services/gudang/gudang.model';
 import { NgForm } from '@angular/forms';
-
+import { ToastrService } from 'ngx-toastr';
 
 
 @Component({
@@ -16,7 +16,7 @@ export class PengaturanComponent implements OnInit {
     
     
     gudangList: Gudang[];
-constructor(private gudangService: GudangService){
+constructor(private gudangService: GudangService,  private tostr: ToastrService){
     }
     ngOnInit() {
         var x = this.gudangService.getData();
@@ -37,6 +37,7 @@ constructor(private gudangService: GudangService){
     else
       this.gudangService.updateEmployee(employeeForm.value);
     this.resetForm(employeeForm);
+    this.tostr.success('Berhasil Ditambahkan !', 'Data Gudang');
   }
  
   resetForm(employeeForm?: NgForm) {
@@ -54,8 +55,9 @@ constructor(private gudangService: GudangService){
   }
  
   onDelete(key: string) {
-    if (confirm('Are you sure to delete this record ?') == true) {
+    if (confirm('Apakah anda yakin ingin menghapus data ini ?') == true) {
       this.gudangService.deleteEmployee(key);
+      this.tostr.error('Berhasil Dihapus !', 'Data Gudang');
     }
   }   
 

@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { AuthService } from '../../../shared/guard/auth.service';
+import { FirebaseUserModel } from '../../../shared/guard/user.model';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
     selector: 'app-sidebar',
@@ -11,8 +14,13 @@ export class SidebarComponent {
     isActive: boolean = false;
     showMenu: string = '';
     pushRightClass: string = 'push-right';
-
-    constructor(private translate: TranslateService, public router: Router) {
+     user: FirebaseUserModel = new FirebaseUserModel();
+    constructor( 
+        public authService: AuthService, 
+        private translate: TranslateService, 
+         private route: ActivatedRoute, 
+        public router: Router) {
+       ;
         this.translate.addLangs(['en', 'fr', 'ur', 'es', 'it', 'fa', 'de']);
         this.translate.setDefaultLang('en');
         const browserLang = this.translate.getBrowserLang();
@@ -28,7 +36,15 @@ export class SidebarComponent {
             }
         });
     }
-
+     ngOnInit(): void {
+    this.route.data.subscribe(routeData => {
+      let data = routeData['data'];
+      if (data) {
+        this.user = data;
+      }
+    })
+  }
+    
     eventCalled() {
         this.isActive = !this.isActive;
     }
@@ -61,6 +77,11 @@ export class SidebarComponent {
     }
 
     onLoggedout() {
-        localStorage.removeItem('isLoggedin');
+       this.authService.doLogout()
+    .then((res) => {
+      this.router.navigate(['/login']);
+    }, (error) => {
+      console.log("Logout error", error);
+    });
     }
 }
