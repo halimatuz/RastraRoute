@@ -18,27 +18,27 @@
                          </div>
 
                           <form #ujiForm="ngForm" (ngSubmit)="onSubmit(ujiForm)" style="padding: 10px">
-                                
+                                 <input type="hidden" name="$key" #$key="ngModel" [(ngModel)]="ujiService.selectedUji.$key">
 
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text"  id="basic-addon1">Iterasi :</span>
+                                        <span class="input-group-text"  id="basic-addon1">Number Gen :</span>
                                     </div>
-                                    <input type="number" class="form-control" name="iterasi" #iterasi="ngModel" [(ngModel)]="num_iterasi" placeholder="Nama Gudang">
+                                    <input type="number" class="form-control" name="numGen" #numGen="ngModel" [(ngModel)]="ujiService.selectedUji.numGen" placeholder="Nama Gudang">
                                 </div>
 
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" id="basic-addon1">Pcrossover :</span>
                                     </div>
-                                    <input type="number" class="form-control" name="pc" #pc="ngModel" [(ngModel)]="prob_crossover" placeholder="Probabilitas Crossover">
+                                    <input type="number" class="form-control" name="pc" #pc="ngModel" [(ngModel)]="ujiService.selectedUji.pc" placeholder="Probabilitas Crossover">
                                 </div>
 
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" id="basic-addon1">Pmutation :</span>
                                     </div>
-                                    <input type="number" class="form-control" name="pm" #pm="ngModel" [(ngModel)]="prob_mutation" placeholder="Probabilitas Mutation">
+                                    <input type="number" class="form-control" name="pm" #pm="ngModel" [(ngModel)]="ujiService.selectedUji.pm" placeholder="Probabilitas Mutation">
                                 </div>
 
                                  <button style="width:100%;font-size: 100%" type="submit" class="btn btn-secondary">Submit</button>
@@ -56,29 +56,26 @@
                         <thead>
                             <tr>
                             <th scope="col">#</th>
-                            <th scope="col">Nama Gudang</th>
-                            <th scope="col">Kapasitas</th>
-                            <th scope="col">Stok</th>
+                            <th scope="col">Number Gen</th>
+                            <th scope="col">Number Pop</th>
+                            <th scope="col">Pc</th>
+                            <th scope="col">Pm</th>
                              <th scope="col">Edit</th>
-                              <th scope="col">Delete</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let item of gudangList; index as i">
+                            <tr *ngFor="let item of ujiList; index as i">
                             <th  scope="row">{{ i+1}}</th>
-                            <td>{{item.namaGudang}}</td>
-                            <td>{{item.kapasitas}}</td>
-                            <td>{{item.stok}}</td>
+                            <td>{{item.numGen}}</td>
+                            <td>{{item.numPop}}</td>
+                            <td>{{item.pc}}</td>
+                            <td>{{item.pm}}</td>
                             <td>
                                 <a class="btn" (click)="onEdit(item)">
                                 <i class="fa fa-pencil-square-o"></i>
                                 </a>
                             </td>
-                            <td>
-                                <a class="btn" (click)="onDelete(item.$key)">
-                                <i class="fa fa-trash-o"></i>
-                                </a>
-                            </td>
+                            
                             </tr>
                             <tr>
                             
@@ -89,8 +86,7 @@
                 </div>
             </div>
                 
-    
-     
+
 
 
     

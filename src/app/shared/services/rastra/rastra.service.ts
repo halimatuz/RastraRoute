@@ -23,7 +23,6 @@ export class RastraService {
       this.rastraList = this.getData();
     }
     this.rastraList.push({
-      tanggal: rastra.tanggal,
       kabupaten: rastra.kabupaten,
       kecamatan: rastra.kecamatan,
       desa: rastra.desa,

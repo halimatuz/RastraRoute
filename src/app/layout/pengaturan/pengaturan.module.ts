@@ -6,6 +6,7 @@ import { PengaturanComponent } from './pengaturan.component';
 import { PageHeaderModule } from './../../shared';
 import { HttpClientModule } from '@angular/common/http';
 import { LayoutModule } from '../layout.module';
+import { FilterPipe } from './filter.pipe';
 
 @NgModule({
     imports: [
@@ -20,6 +21,7 @@ import { LayoutModule } from '../layout.module';
         ],
     declarations: [
         PengaturanComponent,
+        FilterPipe,
         ]
 })
 export class PengaturanModule {

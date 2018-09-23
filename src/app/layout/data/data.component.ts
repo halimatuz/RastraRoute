@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { routerTransition } from '../../router.animations';
 
 import { RastraService } from '../../shared/services/rastra/rastra.service';
-import { Rastra } from '../../shared/services/rastra/rastra.model'
+import { Rastra } from '../../shared/services/rastra/rastra.model';
 
 import * as XLSX from 'xlsx';
 
@@ -22,10 +22,9 @@ export class DataComponent implements OnInit {
     
     columns: any[] =
     [
-            { text: 'Tanggal', dataField: 'tanggal' },
             { text: 'Kabupaten/Kota', dataField: 'kabupaten' },
             { text: 'Kecamatan', dataField: 'kecamatan' },
-            { text: 'Desa', dataField: 'desa' },
+            { text: 'Desa/Kelurahan', dataField: 'desa' },
             { text: 'Colli', dataField: 'colli' }
     ];
     constructor(private rastraService: RastraService){
@@ -48,7 +47,6 @@ export class DataComponent implements OnInit {
         dataFields:
         [
             
-            { name: 'tanggal', type: 'string' },
             { name: 'kabupaten', type: 'string' },
             { name: 'kecamatan', type: 'string' },
             { name: 'desa', type: 'string' },
@@ -98,11 +96,10 @@ export class DataComponent implements OnInit {
 changetoRastra(x : any[],index:number){
 let arr= new Rastra ();
 arr['$key']=null;
-arr['tanggal']=x[0];
-arr['kabupaten']=x[1];
-arr['kecamatan']=x[2];
-arr['desa']=x[3];
-arr['colli']=x[4];
+arr['kabupaten']=x[0];
+arr['kecamatan']=x[1];
+arr['desa']=x[2];
+arr['colli']=x[3];
 this.rastra.push(arr);
 }
 onCreate(x:Rastra) {

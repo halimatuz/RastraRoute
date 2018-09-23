@@ -34,7 +34,6 @@ gudangList: AngularFireList<any>;
   updateEmployee(employee : Gudang){
     this.gudangList.update(employee.$key,
       {
-        namaGudang: employee.namaGudang,
       kapasitas: employee.kapasitas,
       stok: employee.stok
       });
