@@ -13,12 +13,11 @@ import { DataranTinggi } from '../dataran-tinggi/dataran-tinggi.model';
 
 import { Route2016Service } from '../route2016/route2016.service';
 import { Route2016 } from '../route2016/route2016.model';
-
 @Injectable({
   providedIn: 'root'
 })
-export class GenalgoService {
-  distance:any[][]; //data jarak
+export class Genalgov2Service {
+distance:any[][]; //data jarak
   rastra: Rastra[];  //data kelurahan dan colli
   gudang : Gudang[]; //data stok
   dataran : DataranTinggi[]; //data dataran tinggi
@@ -33,6 +32,11 @@ export class GenalgoService {
   jarak2016: number=0;
   vCap: number=533;
   vDating: number =400;
+  rastraGroup: any[][];
+  matrixSaving : any;
+  listSaving : any;
+  ass : any;
+  sumGroup:any[];
 
   constructor(
     private http: HttpClient,
@@ -55,17 +59,20 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
   this.f_gudang=[]; //data gudang asal rute diantarkan
   this.sum_colli=0; //data jumlah colli yang diantarkan
   this.sub_colli=[];//data jumlah colli tiap sub route
-
+  this.rastraGroup=[];
+  this.sumGroup=[];
 
    this.InitializeDistance()
   .then(res =>{
     if(res){
       //console.log(this.distance);
+      
       return this.InitializeRastra();
     }
   })
   .then(res =>{
     if(res){
+      
       //console.log(this.rastra);
       
       //console.log(this.sum_colli);
@@ -76,6 +83,12 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
      if(res)
     // console.log(this.gudang.length);
     // console.log(this.gudang);
+    this.groupingCust(this.deepCopy(this.distance), this.deepCopy(this.rastra));
+    console.log(this.rastraGroup);
+    this.matrixSavings(this.deepCopy(this.rastraGroup),this.deepCopy(this.distance));
+    console.log(this.matrixSaving);
+    this.getCust(2);
+    
     
     return this.InitializeDataran();
 
@@ -84,7 +97,15 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
      if(res)
       //console.log(this.dataran.length);
 
+    return this.Routing(2);
+
+  })
+  .then(res =>{
+     if(res)
+      //console.log(this.dataran.length);
+
     return this.generateRoute(numberPop);
+
   }).then(res =>{
      if(res){
       // console.log(this.route);
@@ -179,6 +200,72 @@ return new Promise((resolve,reject) =>{
 
     
   }
+//grouping cust berdasarakan jarak terdekat ke depot
+groupingCust(dist: any[][], ras : Rastra[]){
+  
+  
+  for(let i=0; i<ras.length;i++){
+    let x=dist[i+7].slice(0,7);
+    let val = x.sort((a,b)=>a-b);
+    let idx=dist[i+7].slice(0,7).indexOf(val[0]);
+    this.sumGroup[idx]+=ras[i]['colli'];
+    this.rastraGroup[idx].push(ras[i]);
+  }
+}
+//routing clark and Wright
+matrixSavings(rasgroup : any[][][], dist: any[][]){
+ let x=[];
+ let list=[];
+ let asslist=[];
+ for(let i=0; i<rasgroup.length;i++){
+   x[i]=[];
+   list[i]=[];
+   asslist[i]=[];
+   for(let j=0; j<rasgroup[i].length;j++){
+     x[i][j]=[];
+     
+     for(let k=0; k<j;k++){
+let saving=Number(dist[rasgroup[i][j]['$key']+7][i])+Number(dist[rasgroup[i][k]['$key']+7][i])-Number(dist[rasgroup[i][j]['$key']+7][rasgroup[i][k]['$key']+7]);
+      
+      x[i][j].push(saving);
+      list[i].push(saving);
+      let b=[];
+      b[0]=rasgroup[i][j]['$key'];
+      b[1]=rasgroup[i][k]['$key'];
+      asslist[i].push(b);
+     }
+    
+   }
+   
+ }
+ this.listSaving=list;
+ this.ass=asslist;
+this.matrixSaving=x;
+}
+
+getCust(gudangId : number){
+let sv=this.deepCopy(this.listSaving[gudangId]);
+let aslist=this.deepCopy(this.ass[gudangId]);
+
+for(let i=0; i<aslist.length-1;i++){
+  for(let j=0;j<aslist.length-1-i;j++){
+    if(sv[j]<sv[j+1]){
+      let z=sv[j];
+      sv[j]=sv[j+1];
+      sv[j+1]=z;
+      let y=aslist[j];
+      aslist[j]=aslist[j+1];
+      aslist[j+1]=y;
+    }
+    
+  }
+}
+return aslist;
+
+}
+
+
+
 //menyimpan data rastra dlm array
 InitializeRastra(){
     return new Promise((resolve,reject) =>{
@@ -214,6 +301,8 @@ InitializeGudang(){
          
         var y = element.payload.toJSON();
          this.gudang.push(y as Gudang);
+          this.rastraGroup[i]=[];
+          this.sumGroup[i]=0;
         i++;
       });
       return resolve(true);
@@ -246,30 +335,7 @@ return new Promise((resolve,reject) =>{
     
 
 }
-//grouping rastra by its date
-/*
 
-rastraGroupbyDate(){
-  let list_date=[];
- let index=0;
- this.group_rastra=[]
-for(let i=0; i<this.rastra.length;i++){
-  let existed=list_date.indexOf(this.rastra[i].tanggal);
-  
-  if(existed==-1){
-    //jika belum terdapat tanggal yang tergroup
-    list_date.push(this.rastra[i].tanggal);
-    this.group_rastra[index]=[];
-    this.group_rastra[index][0]=[];
-    this.group_rastra[index][0]= this.rastra[i];
-    index++;
-  }else{
-    //jika telah ada tanggal tergroup
-     this.group_rastra[existed][this.group_rastra[existed].length]=this.rastra[i];
-  }
-}
-}
-*/
 
 //mengecek dataran tinggi
 isDataranTinggi(desa :string, kec :string): boolean{
@@ -324,6 +390,250 @@ isEnoughStok(subcolli: any[], gdg:any[][]): boolean {
   }
   return isEnough;
 }
+findIdx(gidx:number, key: number){
+  let i=0;
+  let found=false;
+  let idx=-1;
+  while(i<this.rastraGroup[gidx].length&&!found){
+    if(key=this.rastraGroup[gidx][i]['$key']){
+      found=true;
+      idx=i;
+    }
+    i++
+  }
+  return idx;
+}
+
+//Generate Random route
+Routing(gidx:number){
+ return new Promise((resolve,reject) =>{
+   let rute=[];
+   let datingFlag=[];
+   let vdat=[];
+   let vkap=[];
+   let colli_in_subroute=[];
+   let ras=this.deepCopy(this.rastra);
+   let rasgrup=this.deepCopy(this.rastraGroup[gidx]);
+   let aslist=this.getCust(gidx);
+   let i=0; //index subroute
+   let sumC=this.sumGroup[gidx];
+   let gdg = this.deepCopy(this.gudang);
+   let sub_colli=[];
+   let k=0;//index aslist
+    while(k<aslist.length&&sumC>0){ //loop hingga kapasitas kendaraan -> menghasilkan 1 sub route
+        
+            
+            let bridge=aslist[k];
+              //apakah pernah di route?
+              let a=0;
+              let ada=false;
+              let notpenuh=false;
+              let subrute=-1;
+              let nmras=-1;
+              while(a<rute.length&&!ada){
+                for(let b=0; b<rute[a].length;b++){
+                  if(bridge[0]==rute[a][b].$key||bridge[1]==rute[a][b].$key){
+                    ada=true;
+                    if(b=0  && vkap[a]<this.vCap){
+                      notpenuh=true;
+                      subrute=a;
+                      nmras=b;
+                      break;
+                    }else 
+                    if(b!=0 && datingFlag[a]==true && vdat[a]<this.vDating){
+                      notpenuh=true;
+                      subrute=a;
+                      nmras=b;
+                      break;
+                    }
+                  }
+                }
+              }
+              console.log(ada+'_'+notpenuh);
+
+              //jika ada=false maka assign ke rute baru
+            if(ada==false){
+              rute[i]=[];
+              let r=[];
+                if(this.isDataranTinggi(ras[bridge[0]].desa,ras[bridge[0]].kecamatan )){//jika dataran tinggi
+                datingFlag[i]=true;
+                //jika kapasitas muatan dataran tinggi > demand
+                
+                    if(this.vDating>=ras[bridge[0]].colli){
+                      //maka semua demand diantarkan
+                    r["index"]=ras[bridge[0]].$key;
+                    r["desa"]=ras[bridge[0]].desa;
+                    r["kecamatan"]=ras[bridge[0]].kecamatan;
+                    r["kab"]=ras[bridge[0]].kabupaten;
+                    r["load"]=ras[bridge[0]].colli;
+                    vdat[i]=this.vDating-ras[bridge[0]].colli;
+                    vkap[i]=this.vCap-ras[bridge[0]].colli;
+                    colli_in_subroute[i]=ras[bridge[0]].colli;
+                    sumC-=ras[bridge[0]].colli;
+                    rasgrup[this.findIdx(gidx,bridge[0])].colli=0;
+                  }
+                  //jika kapasitas muatan dataran tinggi < demand
+                  else{
+                    //maka sebagian demand diantarkan
+                    r["index"]=ras[bridge[0]].$key;
+                    r["desa"]=ras[bridge[0]].desa;
+                    r["kecamatan"]=ras[bridge[0]].kecamatan;
+                    r["kab"]=ras[bridge[0]].kabupaten;
+                    r["load"]=this.vDating;
+                    rasgrup[bridge[0]].colli=ras[bridge[0]].colli-this.vDating;
+                    vdat[i]=this.vDating-ras[bridge[0]].colli;
+                    vkap[i]=this.vCap-ras[bridge[0]].colli;
+                    colli_in_subroute[i]+=this.vDating; 
+                    sumC-=this.vDating; 
+                  }
+                }
+                //bukan dataran tinggi
+                else{
+               //jika kapasitas truk > demand
+                    if(this.vCap>=ras[bridge[0]].colli){
+                      //maka semua demand diantarkan
+                    r["index"]=ras[bridge[0]].$key;
+                    r["desa"]=ras[bridge[0]].desa;
+                    r["kecamatan"]=ras[bridge[0]].kecamatan;
+                    r["kab"]=ras[bridge[0]].kabupaten;
+                    r["load"]=ras[bridge[0]].colli;
+                    vdat[i]=this.vDating;
+                    vkap[i]=this.vCap-ras[bridge[0]].colli;
+                    colli_in_subroute[i]=ras[bridge[0]].colli;
+                    sumC-=ras[bridge[0]].colli;
+                    rasgrup[this.findIdx(gidx,bridge[0])].colli=0;
+                  }
+                  //jika kapasitas truk < demand
+                  else{
+                    //maka sebagian demand diantarkan
+                     r["index"]=ras[bridge[0]].$key;
+                    r["desa"]=ras[bridge[0]].desa;
+                    r["kecamatan"]=ras[bridge[0]].kecamatan;
+                    r["kab"]=ras[bridge[0]].kabupaten;
+                    r["load"]=this.vCap;
+                    rasgrup[bridge[0]].colli=ras[bridge[0]].colli-this.vCap;
+                    vdat[i]=this.vDating;
+                    vkap[i]=this.vCap-ras[bridge[0]].colli;
+                    colli_in_subroute[i]+=this.vCap; 
+                    sumC-=this.vCap;
+                  }
+            }
+            rute[i].push(r);
+
+            //memasukkan bridge kedua 
+            r=[];
+                if(datingFlag[i] ){//jika dataran tinggi
+                  //jika kapasitas truk >= kapasitas muatan dataran tinggi
+                if(vkap[i]>=vdat[i]){
+                //jika kapasitas muatan dataran tinggi > demand
+                    if(vdat[i]>=ras[bridge[1]].colli){
+                      //maka semua demand diantarkan
+                    r["index"]=ras[bridge[1]].$key;
+                    r["desa"]=ras[bridge[1]].desa;
+                    r["kecamatan"]=ras[bridge[1]].kecamatan;
+                    r["kab"]=ras[bridge[1]].kabupaten;
+                    r["load"]=ras[bridge[1]].colli;
+                    vdat[i]-=ras[bridge[1]].colli;
+                    vkap[i]-=ras[bridge[1]].colli;
+                    colli_in_subroute[i]=ras[bridge[1]].colli;
+                    sumC-=ras[bridge[1]].colli;
+                    rasgrup[this.findIdx(gidx,bridge[1])].colli=1;
+                  }
+                  //jika kapasitas muatan dataran tinggi < demand
+                  else{
+                    //maka sebagian demand diantarkan
+                    r["index"]=ras[bridge[1]].$key;
+                    r["desa"]=ras[bridge[1]].desa;
+                    r["kecamatan"]=ras[bridge[1]].kecamatan;
+                    r["kab"]=ras[bridge[1]].kabupaten;
+                    r["load"]=vdat[i];
+                    rasgrup[bridge[1]].colli=ras[bridge[1]].colli-vdat[i];
+                    vkap[i]-=ras[bridge[1]].colli;
+                    colli_in_subroute[i]+=vdat[i]; 
+                    sumC-=vdat[i]; 
+                    vdat[i]-=ras[bridge[1]].colli;
+                  }
+                }
+                //jika kapasitas truk < kapasitas muatan dataran tinggi
+                else{
+                  
+                  //jika kapasitas truk > demand
+                    if(vkap[i]>=ras[bridge[1]].colli){
+                      //maka semua demand diantarkan
+                    r["index"]=ras[bridge[1]].$key;
+                    r["desa"]=ras[bridge[1]].desa;
+                    r["kecamatan"]=ras[bridge[1]].kecamatan;
+                    r["kab"]=ras[bridge[1]].kabupaten;
+                    r["load"]=ras[bridge[1]].colli;
+                    vdat[i]-=ras[bridge[1]].colli;
+                    vkap[i]-=ras[bridge[1]].colli;
+                    colli_in_subroute[i]=ras[bridge[1]].colli;
+                    sumC-=ras[bridge[1]].colli;
+                    rasgrup[this.findIdx(gidx,bridge[1])].colli=1;
+                  }
+                  //jika kapasitas truk < demand
+                  else{
+                    //maka sebagian demand diantarkan
+                    r["index"]=ras[bridge[1]].$key;
+                    r["desa"]=ras[bridge[1]].desa;
+                    r["kecamatan"]=ras[bridge[1]].kecamatan;
+                    r["kab"]=ras[bridge[1]].kabupaten;
+                    r["load"]=vkap[i];
+                    rasgrup[bridge[1]].colli=ras[bridge[1]].colli-vkap[i];
+                    vdat[i]-=vkap[i];
+                    colli_in_subroute[i]+=vkap[i]; 
+                    sumC-=vkap[i];
+                    vkap[i]-=vkap[i];
+                  }
+
+                }
+              }
+              //bukan dataran tinggi
+                else{
+               //jika kapasitas truk > demand
+                    if(this.vCap>=ras[bridge[1]].colli){
+                      //maka semua demand diantarkan
+                    r["index"]=ras[bridge[1]].$key;
+                    r["desa"]=ras[bridge[1]].desa;
+                    r["kecamatan"]=ras[bridge[1]].kecamatan;
+                    r["kab"]=ras[bridge[1]].kabupaten;
+                    r["load"]=ras[bridge[1]].colli;
+                    vdat[i]=this.vDating;
+                    vkap[i]-=ras[bridge[1]].colli;
+                    colli_in_subroute[i]=ras[bridge[1]].colli;
+                    sumC-=ras[bridge[1]].colli;
+                    rasgrup[this.findIdx(gidx,bridge[1])].colli=0;
+                  }
+                  //jika kapasitas truk < demand
+                  else{
+                    //maka sebagian demand diantarkan
+                     r["index"]=ras[bridge[1]].$key;
+                    r["desa"]=ras[bridge[1]].desa;
+                    r["kecamatan"]=ras[bridge[1]].kecamatan;
+                    r["kab"]=ras[bridge[1]].kabupaten;
+                    r["load"]=vkap[i];
+                    rasgrup[bridge[1]].colli=ras[bridge[1]].colli-vkap[i];
+                    vdat[i]=this.vDating;
+                    colli_in_subroute[i]+=vkap[i]; 
+                    sumC-=vkap[i];
+                    vkap[i]-=ras[bridge[1]].colli;
+                  }
+            }
+            rute[i].push(r);
+            
+
+            i++;
+          }
+          k++;
+    }
+    console.log(rute);
+         
+            
+     
+ return resolve(true);
+ });
+}
+
 
 //Generate Random route
 generateRoute(numberPopulation : number){
@@ -1251,110 +1561,5 @@ minVal(dist:number[]){
  return [min,idx];
 }
 
-getRoute2016(){
-   this.InitializeRastra()
-  .then(res =>{
-    if(res){
-      //console.log(this.distance);
-      return this.InitializeDistance();
-    }
-  }).then(res =>{
-    if(res){
-      let r2016:Route2016[];
-   var a = this.route2016Service.getData();
-   console.log(a);
-     a.snapshotChanges().subscribe(item => {
-      
-       r2016=[]
-      item.forEach(element => {
-        var b = element.payload.toJSON();
-        r2016.push(b as Route2016);
-       
-      });
-      let subroute:any[]=[];
-      let fgudang : number[]=[];
-        let i=0;
-        let idxsubRoute=1;
-        subroute[0]=[];
-        r2016[i].index=this.getIndex(r2016[i].kecamatan, r2016[i].desa);
-        subroute[idxsubRoute-1].push(r2016[i]);
-        fgudang.push(r2016[i].fgudang);
-        let same= true;
-       
-          while(i<r2016.length-1){
-             if(r2016[i+1]['subRoute']==idxsubRoute){
-                same=true;
-                r2016[i+1].index=this.getIndex(r2016[i+1].kecamatan, r2016[i+1].desa);
-                subroute[idxsubRoute-1].push(r2016[i+1]);
-              }else{
-                same=false;
-                r2016[i].index=this.getIndex(r2016[i].kecamatan, r2016[i].desa);
-                fgudang.push(r2016[i].fgudang);
-                subroute[idxsubRoute]=[];
-                r2016[i+1].index=this.getIndex(r2016[i+1].kecamatan, r2016[i+1].desa);
-                subroute[idxsubRoute].push(r2016[i+1]);
-                idxsubRoute++;
 
-              }
-           
-             i++;
-            }
-        // console.log(this.rastra);
-        // console.log(r2016);
-        // console.log(fgudang)
-        // console.log(subroute);
-        let ev=this.evaluasiPopulasi_route(subroute,fgudang);
-        console.log(ev);
-        this.jarak2016=ev;
-
-    });
-    }
-  });
-  
 }
-evaluasiPopulasi_route(route: any[][][], f_gudang:number[]):number{
-
-  let j=0;
-  let jarak_route=0;
-  while(j<route.length){//loop sebanyak sub route
-    let k=0;
-    let jarak_subroute=0;
-    jarak_subroute+=Number(this.distance[f_gudang[j]][route[j][k]["index"]+7]); //jarak depot-customer
-    
-  
-    jarak_subroute+=Number(this.distance[route[j][route[j].length-1]["index"]+7][f_gudang[j]]); //jarak customer-depot
-    while(k<route[j].length-1){//loop sebanyak desa dalam sub route
-      jarak_subroute+=Number(this.distance[route[j][k]["index"]+7][route[j][k+1]["index"]+7]); //jarak depot-customer
-      k++;
-    }
-    jarak_route+=jarak_subroute;
-    j++;
-  }
- 
-return jarak_route;
-}
-getIndex(kec : string, desa : string){
- let found=false;
- let i=0;
- let idx=-1;
- while(!found&&i<this.rastra.length){
-  if(this.rastra[i].kecamatan==kec&& this.rastra[i].desa==desa){
-    found=true;
-    idx=Number(this.rastra[i].$key);
-  }
-  i++;
- }
- if(!found){
-   console.log('not found'+idx);
- }
- return idx;
-}
-}
-
-
-
-
- 
-
-
-

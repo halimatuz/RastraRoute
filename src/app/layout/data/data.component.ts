@@ -40,6 +40,7 @@ export class DataComponent implements OnInit {
         this.rastraList.push(y as Rastra);
       });
       //load data into table
+      console.log(this.rastraList);
       this.source =
         {
         localData: this.rastraList,

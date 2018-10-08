@@ -45,6 +45,7 @@
 
                             </form>
                     </div>
+                    <button style="width:100%;font-size: 100%" type="button" class="btn btn-secondary" (click)="calculate()">Calculate</button>
                 </div>
                 <div class="col-sm-8">
                     <div class="card mb-3" >
@@ -86,7 +87,15 @@
                 </div>
             </div>
                 
-
+            <div class="card mb-3">
+                <div class="card-header">
+                    Line Chart : {{gen.jarak2016}}
+                </div>
+                <div class="card-body" *ngIf="lineChartData" >
+                    <canvas baseChart height="130" [datasets]="lineChartData" [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="lineChartColors" [legend]="lineChartLegend" [chartType]="lineChartType" ></canvas>
+                   
+                </div>
+            </div>
 
 
     

@@ -10,6 +10,7 @@ import { HeaderComponent } from './components/header/header.component';
 
 import { jqxDataTableComponent} from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxdatatable';
 import { jqxChartComponent } from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxchart';
+import { jqxLoaderComponent } from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxloader';
 
 import { FormsModule} from '@angular/forms';
 
@@ -28,12 +29,15 @@ import { FormsModule} from '@angular/forms';
         SidebarComponent, 
         HeaderComponent,
         jqxDataTableComponent,
-        jqxChartComponent
+        jqxChartComponent,
+        jqxLoaderComponent
         ],
     exports: [
         jqxDataTableComponent,
         jqxChartComponent,
-        FormsModule
+        jqxLoaderComponent,
+        FormsModule,
+
         
         
         

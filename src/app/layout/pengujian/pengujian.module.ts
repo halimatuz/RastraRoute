@@ -7,6 +7,8 @@ import { PageHeaderModule } from './../../shared';
 import { HttpClientModule } from '@angular/common/http';
 import { LayoutModule } from '../layout.module';
 
+import { ChartsModule as Ng2Charts } from 'ng2-charts';
+
 @NgModule({
     imports: [
         CommonModule, 
@@ -14,6 +16,7 @@ import { LayoutModule } from '../layout.module';
         PageHeaderModule, 
         HttpClientModule,
         LayoutModule,
+        Ng2Charts
         
         
 
