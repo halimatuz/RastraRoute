@@ -37,6 +37,14 @@ distance:any[][]; //data jarak
   listSaving : any;
   ass : any;
   sumGroup:any[];
+  RouteGroup: any[];
+  populasi: any[];
+  populasi_fit : any[];
+  fromG : any[];
+  subCol : any[];
+  Dating_Flag: any[];
+  info_Col:any[];
+  info_dating: any[];
 
   constructor(
     private http: HttpClient,
@@ -61,7 +69,16 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
   this.sub_colli=[];//data jumlah colli tiap sub route
   this.rastraGroup=[];
   this.sumGroup=[];
-
+  this.RouteGroup=[];
+  this.populasi=[];
+  this.populasi_fit=[];
+  this.fromG=[];
+  this.subCol=[];
+  this.Dating_Flag=[];
+  this.info_Col=[];
+  this.info_dating=[];
+  this.prob_cross=Pc;
+  this.prob_mutation=Pm;
    this.InitializeDistance()
   .then(res =>{
     if(res){
@@ -81,13 +98,9 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
   })
   .then(res =>{
      if(res)
-    // console.log(this.gudang.length);
-    // console.log(this.gudang);
-    this.groupingCust(this.deepCopy(this.distance), this.deepCopy(this.rastra));
-    console.log(this.rastraGroup);
-    this.matrixSavings(this.deepCopy(this.rastraGroup),this.deepCopy(this.distance));
-    console.log(this.matrixSaving);
-    this.getCust(2);
+    console.log(this.gudang.length);
+    console.log(this.gudang);
+   
     
     
     return this.InitializeDataran();
@@ -95,85 +108,47 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
   })
   .then(res =>{
      if(res)
-      //console.log(this.dataran.length);
-
-    return this.Routing(2);
-
+   return this.groupingCust( this.deepCopy(this.rastra));
+    
+    
   })
   .then(res =>{
-     if(res)
-      //console.log(this.dataran.length);
-
-    return this.generateRoute(numberPop);
-
-  }).then(res =>{
-     if(res){
-      // console.log(this.route);
-      console.log(this.sub_colli);
-     return this.generateDepot(this.route.length,this.deepCopy(this.sub_colli));
-             
-     }
-  })
-  .then(res =>{
-     if(res){
-       this.f_gudang=this.deepCopy(res);
-      // console.log(this.f_gudang);
-      let x=this.evaluasiPopulasi(this.deepCopy(this.route),this.deepCopy(res));
-      // console.log(this.deepCopy(x));
-      if(this.route.length==numberPop){
-      let a=this.minVal(this.deepCopy(x));
-      let elite=a[0];
-      let eliteidx=a[1];
-      let histElite: number []=[];
-      let individu:any[][][]=this.deepCopy(this.route[a[1]]);
-      //console.log(this.deepCopy(this.route[a[1]]));
-      let fgudang : number[]=this.deepCopy(res[a[1]]);
-      let idx=0;
-      this.numIter=numberGen;
-      while(idx<this.numIter){
-        console.log("iter : "+idx);
-      let y=this.calculateFitness(this.deepCopy(x));
-      let sel=this.selection(this.deepCopy(this.route),this.deepCopy(y),this.deepCopy(res));
-      // console.log(sel);
-      this.prob_cross=Pc;
-      let cross=this.crossover(this.deepCopy(sel[0]), this.deepCopy(this.route), this.deepCopy(sel[1]), this.deepCopy(sel[2]));
-      // console.log(cross);
-      this.prob_mutation=Pm;
-      let mut=this.mutation(this.deepCopy(cross[0]));
-      // console.log(mut);
-      x=this.evaluasiPopulasi(this.deepCopy(mut),this.deepCopy(cross[1]));
-      // console.log(this.deepCopy(x));
-      let val=this.minVal(this.deepCopy(x));
-      histElite[idx]=elite;
-      if(elite>val[0]){
-        elite=val[0];
-        eliteidx=val[1];
-        let ind=this.deepCopy(mut);
-        individu=ind[a[1]];
-        let gud=this.deepCopy(cross[1]);
-        fgudang=gud[a[1]];
-
-      }
+     if(!res){
+      this.AssignSingleCust();
+    console.log(this.deepCopy(this.rastraGroup));
+    this.matrixSavings(this.deepCopy(this.rastraGroup),this.deepCopy(this.distance));
+    let i=0;
+    while(i<numberPop){
+      console.log(i);
+      let x=this.Routing(i);
+      this.populasi.push(x[0]);
+      this.fromG.push(x[1]);
+      this.info_Col.push(x[2]);
+      this.info_dating.push(x[3]);
+      i++;
+    }
       
-      console.log(elite);
-      idx++;
-       }
-    
-    console.log(histElite);
-    console.log(individu);
-    console.log(fgudang);
-    return resolve([histElite,individu, fgudang]);
-      }else{
-        //action mean gudang no cukup
-        console.log("caonnot process : gudang stok tidkan mencukupi");
-        return  resolve(false);
-      }
-    
-
-            
+    return this.scheduling(this.deepCopy(this.populasi),this.deepCopy(this.info_dating), this.deepCopy(this.fromG));
      }
+     else{
+      console.log('Tidak Cukup');
+     }
+  })
+  .then(res =>{
+     if(res){
+      this.populasi=this.deepCopy(res);
+      console.log(this.deepCopy(this.populasi));
+     let jarak=this.evaluasiClark();
+     console.log(jarak);
+      let y=this.calculateFitness(this.deepCopy(jarak));
+      let sel=this.selection(this.deepCopy(this.populasi),this.deepCopy(y),this.deepCopy(this.fromG),this.deepCopy(this.info_Col), this.deepCopy(this.info_dating) );
+      console.log(sel);
+      this.crossover(this.deepCopy(sel[0]), this.deepCopy(sel[1]), this.deepCopy(this.populasi),  this.deepCopy(sel[2]), this.deepCopy(this.fromG), this.deepCopy(sel[3]), this.deepCopy(this.info_Col), this.deepCopy(sel[4]), this.deepCopy(this.info_dating) );
+     }
+   return true;
     
-  });
+    
+  })
   });
 }
 
@@ -201,17 +176,116 @@ return new Promise((resolve,reject) =>{
     
   }
 //grouping cust berdasarakan jarak terdekat ke depot
-groupingCust(dist: any[][], ras : Rastra[]){
-  
-  
-  for(let i=0; i<ras.length;i++){
+groupingCust(ras : Rastra[]){
+  return new Promise((resolve,reject) =>{
+  let dist=this.deepCopy(this.distance);
+  let gdg = this.deepCopy(this.gudang);
+  let i=0;
+  let notfound =false;
+  let sum=0;
+
+  while( i<ras.length&&!notfound){
+     let assign =false;
     let x=dist[i+7].slice(0,7);
-    let val = x.sort((a,b)=>a-b);
-    let idx=dist[i+7].slice(0,7).indexOf(val[0]);
+    let xc=this.deepCopy(x);
+    let val = this.deepCopy(x);
+    val=val.sort((a,b)=>a-b);
+    let idx=xc.indexOf(val[0]);
+    let idxRemove=xc.indexOf(val[0]);
+    
+    while(!assign&&x.length>0){
+    let jml=Math.floor((gdg[idx]['stok']*1000/15));
+
+    if(jml<=ras[i]['colli']){
+      x.splice(idxRemove,1);
+ 
+      
+      val = this.deepCopy(x);
+      val=val.sort((a,b)=>a-b);
+      idx=xc.indexOf(val[0]);
+      idxRemove=x.indexOf(val[0]);
+      
+    }
+    else{
+    gdg[idx]['stok']-=(ras[i]['colli']*15/1000);
     this.sumGroup[idx]+=ras[i]['colli'];
+    sum+=ras[i]['colli'];
     this.rastraGroup[idx].push(ras[i]);
+    assign=true;
+    i++;
   }
 }
+
+if(!assign){
+notfound=true;
+}
+  
+    
+}
+for(let i=0; i<gdg.length;i++){
+   console.log(Math.floor((gdg[i]['stok']*1000/15)));
+}
+console.log(notfound);
+console.log(sum);
+console.log(ras);
+if(!notfound){
+  return resolve(false);//jika  cukup maka false
+  }
+  else
+  return resolve(true);//jika tidak cukup maka true
+  });
+}
+//generate route untuk customer dengan demand > vCap
+AssignSingleCust(){
+  for(let i=0; i<this.rastraGroup.length; i++){
+    this.RouteGroup[i]=[];
+    this.subCol[i]=[];
+    this.Dating_Flag[i]=[];
+    let idx=0;
+    for(let j=0; j<this.rastraGroup[i].length; j++){
+      let b=[];
+      if(this.isDataranTinggi(this.rastraGroup[i][j].desa,this.rastraGroup[i][j].kecamatan )){
+        if(this.rastraGroup[i][j].colli>=this.vDating){
+          let r=[];
+          r["index"]=this.rastraGroup[i][j].$key;
+          r["desa"]=this.rastraGroup[i][j].desa;
+          r["kecamatan"]=this.rastraGroup[i][j].kecamatan;
+          r["kab"]=this.rastraGroup[i][j].kabupaten;
+          r["load"]=this.vDating; 
+           this.subCol[i].push(this.vDating);
+          this.sumGroup[i]-= this.vDating; 
+          this.Dating_Flag[i].push(true);
+          this.rastraGroup[i][j].colli-=this.vDating;  
+          b.push(r);              
+          this.RouteGroup[i].push(b);
+          if(this.rastraGroup[i][j].colli==0)
+            this.rastraGroup[i].splice(j,1);
+        }
+      }
+      else{
+        if(this.rastraGroup[i][j].colli>=this.vCap){
+          let r=[];
+          r["index"]=this.rastraGroup[i][j].$key;
+          r["desa"]=this.rastraGroup[i][j].desa;
+          r["kecamatan"]=this.rastraGroup[i][j].kecamatan;
+          r["kab"]=this.rastraGroup[i][j].kabupaten;
+          r["load"]=this.vCap; 
+          this.subCol[i].push(this.vCap);
+           this.sumGroup[i]-= this.vCap; 
+           this.Dating_Flag[i].push(false);
+          this.rastraGroup[i][j].colli-=this.vCap;                
+          b.push(r);              
+          this.RouteGroup[i].push(b);
+          if(this.rastraGroup[i][j].colli==0)
+            this.rastraGroup[i].splice(j,1);
+        }
+      }
+      
+    }
+    
+  }
+}
+
 //routing clark and Wright
 matrixSavings(rasgroup : any[][][], dist: any[][]){
  let x=[];
@@ -242,7 +316,7 @@ let saving=Number(dist[rasgroup[i][j]['$key']+7][i])+Number(dist[rasgroup[i][k][
  this.ass=asslist;
 this.matrixSaving=x;
 }
-
+//mengambil list dari matrix
 getCust(gudangId : number){
 let sv=this.deepCopy(this.listSaving[gudangId]);
 let aslist=this.deepCopy(this.ass[gudangId]);
@@ -348,54 +422,13 @@ return dating;
 
 }
 
-//mengecek stok gudang
-isEnoughStok(subcolli: any[], gdg:any[][]): boolean {
- 
-  let isEnough= true;
-  let x :number[]=[];
-  let count : number[]=[];
 
-  // grouping colli
-  for(let i=0; i<subcolli.length; i++){ //sebanyak sub route
-    let existed=x.indexOf(subcolli[i]); //cek apakah nilai colli pernah ada
-    if(existed==-1){ //jika group blum ada
-      let l=x.push(subcolli[i]);
-      count[l-1]=1;
-    }
-    else{ // jika telah ada group
-      count[existed]+=1;
-    }
-  }
-//  console.log(x);
-//  console.log(count); 
- 
-  //menghitung kecukupan stok
-  for(let i=0; i<x.length;i++){
-    let j=0;
-    while( j<gdg.length&&count[i]>0){
-      let jml=Math.floor((gdg[j]['stok']*1000/15)/x[i]); 
-      if(jml<=count[i]){
-        gdg[j]['stok']-=(jml*x[i]*15/1000);
-        count[i]-=jml;
-      }
-      else{
-        gdg[j]['stok']-=(count[i]*x[i]*15/1000);
-        count[i]-=count[i];
-      }
-      j++;
-    }
-    if(count[i]>0){
-      isEnough=false;
-      }
-  }
-  return isEnough;
-}
 findIdx(gidx:number, key: number){
   let i=0;
   let found=false;
   let idx=-1;
   while(i<this.rastraGroup[gidx].length&&!found){
-    if(key=this.rastraGroup[gidx][i]['$key']){
+    if(key==this.rastraGroup[gidx][i]['$key']){
       found=true;
       idx=i;
     }
@@ -405,115 +438,165 @@ findIdx(gidx:number, key: number){
 }
 
 //Generate Random route
-Routing(gidx:number){
- return new Promise((resolve,reject) =>{
+Routing(kidx: number){
+   
+   //jika colli lebih besar dari vcap maka diassign dalm saru rute
+let gidx=0;
+let ruteGrup=this.deepCopy(this.RouteGroup);
+let subColli=this.deepCopy(this.subCol);
+let dating_flag_or=this.deepCopy(this.Dating_Flag);
+let kromosom=[];
+let fgd=[];
+let colli_on_Subroute=[];
+let datFlag=[];
+let vdatshow=[];
+let vkapshow=[];
+
+
+while(gidx<this.RouteGroup.length){
+    
    let rute=[];
    let datingFlag=[];
    let vdat=[];
    let vkap=[];
    let colli_in_subroute=[];
-   let ras=this.deepCopy(this.rastra);
    let rasgrup=this.deepCopy(this.rastraGroup[gidx]);
    let aslist=this.getCust(gidx);
    let i=0; //index subroute
+   rute[i]=[]
    let sumC=this.sumGroup[gidx];
    let gdg = this.deepCopy(this.gudang);
    let sub_colli=[];
-   let k=0;//index aslist
+   let k=kidx;//index aslist
+
     while(k<aslist.length&&sumC>0){ //loop hingga kapasitas kendaraan -> menghasilkan 1 sub route
-        
-            
+         //console.log(k);
+            //  console.log(aslist[k]);
             let bridge=aslist[k];
+            let c=this.findIdx(gidx,bridge[0]);
+            let d=this.findIdx(gidx,bridge[1]);
+            // console.log(sumC)
+            // console.log(rasgrup[c].colli);
+            // console.log(rasgrup[d].colli);
+            // console.log(rasgrup[c].colli>0 || rasgrup[d].colli>0);
+            if(rasgrup[c].colli>0 || rasgrup[d].colli>0){
               //apakah pernah di route?
               let a=0;
               let ada=false;
               let notpenuh=false;
               let subrute=-1;
               let nmras=-1;
-              while(a<rute.length&&!ada){
-                for(let b=0; b<rute[a].length;b++){
-                  if(bridge[0]==rute[a][b].$key||bridge[1]==rute[a][b].$key){
+              let selbridge=-1;
+              while(a<rute.length&&!notpenuh){
+                let b=0
+                while(b<rute[a].length&&!notpenuh){
+                  
+                  if(bridge[0]==rute[a][b].index||bridge[1]==rute[a][b].index){
                     ada=true;
-                    if(b=0  && vkap[a]<this.vCap){
+                    // console.log(vkap[a]);
+                    if(b==0 && vkap[a]>0 ){
                       notpenuh=true;
                       subrute=a;
                       nmras=b;
-                      break;
-                    }else 
-                    if(b!=0 && datingFlag[a]==true && vdat[a]<this.vDating){
+                    }else {
+                      
+                      if(b==rute[a].length-1 && datingFlag[a]==true && vdat[a]>0 && vkap[a]>0){
                       notpenuh=true;
                       subrute=a;
                       nmras=b;
-                      break;
+                    }
+                    else{
+                      if(b==rute[a].length-1 && datingFlag[a]==false  && vkap[a]>0){
+                      notpenuh=true;
+                      subrute=a;
+                      nmras=b;
                     }
                   }
+                   }
+                   if(notpenuh&&bridge[0]==rute[a][b].index&&rasgrup[c].colli>0){
+                    selbridge=bridge[0];
+                   }else{
+                    if(bridge[0]==rute[a][b].index)
+                    selbridge=bridge[1];
+                    else
+                    selbridge=bridge[0];
+                   }
+                  
+                    
+                  }
+
+                  b++;
                 }
+                a++;
               }
-              console.log(ada+'_'+notpenuh);
+              // console.log(k+'_'+ada+'_'+notpenuh+'_'+selbridge);
 
               //jika ada=false maka assign ke rute baru
             if(ada==false){
               rute[i]=[];
+              colli_in_subroute[i]=0;
               let r=[];
-                if(this.isDataranTinggi(ras[bridge[0]].desa,ras[bridge[0]].kecamatan )){//jika dataran tinggi
+                if(this.isDataranTinggi(rasgrup[c].desa,rasgrup[c].kecamatan)){//jika dataran tinggi
                 datingFlag[i]=true;
                 //jika kapasitas muatan dataran tinggi > demand
-                
-                    if(this.vDating>=ras[bridge[0]].colli){
+                // console.log('vdat : '+this.vDating+'_'+rasgrup[c].colli);
+                    if(this.vDating>=rasgrup[c].colli){
                       //maka semua demand diantarkan
-                    r["index"]=ras[bridge[0]].$key;
-                    r["desa"]=ras[bridge[0]].desa;
-                    r["kecamatan"]=ras[bridge[0]].kecamatan;
-                    r["kab"]=ras[bridge[0]].kabupaten;
-                    r["load"]=ras[bridge[0]].colli;
-                    vdat[i]=this.vDating-ras[bridge[0]].colli;
-                    vkap[i]=this.vCap-ras[bridge[0]].colli;
-                    colli_in_subroute[i]=ras[bridge[0]].colli;
-                    sumC-=ras[bridge[0]].colli;
+                    r["index"]=rasgrup[c].$key;
+                    r["desa"]=rasgrup[c].desa;
+                    r["kecamatan"]=rasgrup[c].kecamatan;
+                    r["kab"]=rasgrup[c].kabupaten;
+                    r["load"]=rasgrup[c].colli;
+                    vdat[i]=this.vDating-rasgrup[c].colli;
+                    vkap[i]=this.vCap-rasgrup[c].colli;
+                    colli_in_subroute[i]+=rasgrup[c].colli;
+                    sumC-=rasgrup[c].colli;
                     rasgrup[this.findIdx(gidx,bridge[0])].colli=0;
+                    
                   }
                   //jika kapasitas muatan dataran tinggi < demand
                   else{
                     //maka sebagian demand diantarkan
-                    r["index"]=ras[bridge[0]].$key;
-                    r["desa"]=ras[bridge[0]].desa;
-                    r["kecamatan"]=ras[bridge[0]].kecamatan;
-                    r["kab"]=ras[bridge[0]].kabupaten;
+                    r["index"]=rasgrup[c].$key;
+                    r["desa"]=rasgrup[c].desa;
+                    r["kecamatan"]=rasgrup[c].kecamatan;
+                    r["kab"]=rasgrup[c].kabupaten;
                     r["load"]=this.vDating;
-                    rasgrup[bridge[0]].colli=ras[bridge[0]].colli-this.vDating;
-                    vdat[i]=this.vDating-ras[bridge[0]].colli;
-                    vkap[i]=this.vCap-ras[bridge[0]].colli;
+                    rasgrup[this.findIdx(gidx,bridge[0])].colli=rasgrup[c].colli-this.vDating;
+                    vdat[i]=this.vDating-rasgrup[c].colli;
+                    vkap[i]=this.vCap-this.vDating;
                     colli_in_subroute[i]+=this.vDating; 
                     sumC-=this.vDating; 
                   }
                 }
                 //bukan dataran tinggi
                 else{
+                  datingFlag[i]=false;
                //jika kapasitas truk > demand
-                    if(this.vCap>=ras[bridge[0]].colli){
+                    if(this.vCap>=rasgrup[c].colli){
                       //maka semua demand diantarkan
-                    r["index"]=ras[bridge[0]].$key;
-                    r["desa"]=ras[bridge[0]].desa;
-                    r["kecamatan"]=ras[bridge[0]].kecamatan;
-                    r["kab"]=ras[bridge[0]].kabupaten;
-                    r["load"]=ras[bridge[0]].colli;
+                    r["index"]=rasgrup[c].$key;
+                    r["desa"]=rasgrup[c].desa;
+                    r["kecamatan"]=rasgrup[c].kecamatan;
+                    r["kab"]=rasgrup[c].kabupaten;
+                    r["load"]=rasgrup[c].colli;
                     vdat[i]=this.vDating;
-                    vkap[i]=this.vCap-ras[bridge[0]].colli;
-                    colli_in_subroute[i]=ras[bridge[0]].colli;
-                    sumC-=ras[bridge[0]].colli;
+                    vkap[i]=this.vCap-rasgrup[c].colli;
+                    colli_in_subroute[i]=+rasgrup[c].colli;
+                    sumC-=rasgrup[c].colli;
                     rasgrup[this.findIdx(gidx,bridge[0])].colli=0;
                   }
                   //jika kapasitas truk < demand
                   else{
                     //maka sebagian demand diantarkan
-                     r["index"]=ras[bridge[0]].$key;
-                    r["desa"]=ras[bridge[0]].desa;
-                    r["kecamatan"]=ras[bridge[0]].kecamatan;
-                    r["kab"]=ras[bridge[0]].kabupaten;
+                     r["index"]=rasgrup[c].$key;
+                    r["desa"]=rasgrup[c].desa;
+                    r["kecamatan"]=rasgrup[c].kecamatan;
+                    r["kab"]=rasgrup[c].kabupaten;
                     r["load"]=this.vCap;
-                    rasgrup[bridge[0]].colli=ras[bridge[0]].colli-this.vCap;
+                    rasgrup[this.findIdx(gidx,bridge[0])].colli=rasgrup[c].colli-this.vCap;
                     vdat[i]=this.vDating;
-                    vkap[i]=this.vCap-ras[bridge[0]].colli;
+                    vkap[i]=this.vCap-this.vCap;
                     colli_in_subroute[i]+=this.vCap; 
                     sumC-=this.vCap;
                   }
@@ -521,65 +604,68 @@ Routing(gidx:number){
             rute[i].push(r);
 
             //memasukkan bridge kedua 
-            r=[];
+            if(vdat[i]>0 && vkap[i]>0){
+                r=[];
+                if(!datingFlag[i] )
+                datingFlag[i]=this.isDataranTinggi(rasgrup[this.findIdx(gidx,bridge[1])].desa,rasgrup[this.findIdx(gidx,bridge[1])].kecamatan);
                 if(datingFlag[i] ){//jika dataran tinggi
                   //jika kapasitas truk >= kapasitas muatan dataran tinggi
                 if(vkap[i]>=vdat[i]){
                 //jika kapasitas muatan dataran tinggi > demand
-                    if(vdat[i]>=ras[bridge[1]].colli){
+                    if(vdat[i]>=rasgrup[d].colli){
                       //maka semua demand diantarkan
-                    r["index"]=ras[bridge[1]].$key;
-                    r["desa"]=ras[bridge[1]].desa;
-                    r["kecamatan"]=ras[bridge[1]].kecamatan;
-                    r["kab"]=ras[bridge[1]].kabupaten;
-                    r["load"]=ras[bridge[1]].colli;
-                    vdat[i]-=ras[bridge[1]].colli;
-                    vkap[i]-=ras[bridge[1]].colli;
-                    colli_in_subroute[i]=ras[bridge[1]].colli;
-                    sumC-=ras[bridge[1]].colli;
-                    rasgrup[this.findIdx(gidx,bridge[1])].colli=1;
+                    r["index"]=rasgrup[d].$key;
+                    r["desa"]=rasgrup[d].desa;
+                    r["kecamatan"]=rasgrup[d].kecamatan;
+                    r["kab"]=rasgrup[d].kabupaten;
+                    r["load"]=rasgrup[d].colli;
+                    vdat[i]-=rasgrup[d].colli;
+                    vkap[i]-=rasgrup[d].colli;
+                    colli_in_subroute[i]+=rasgrup[d].colli;
+                    sumC-=rasgrup[d].colli;
+                    rasgrup[this.findIdx(gidx,bridge[1])].colli=0;
                   }
                   //jika kapasitas muatan dataran tinggi < demand
                   else{
                     //maka sebagian demand diantarkan
-                    r["index"]=ras[bridge[1]].$key;
-                    r["desa"]=ras[bridge[1]].desa;
-                    r["kecamatan"]=ras[bridge[1]].kecamatan;
-                    r["kab"]=ras[bridge[1]].kabupaten;
+                    r["index"]=rasgrup[d].$key;
+                    r["desa"]=rasgrup[d].desa;
+                    r["kecamatan"]=rasgrup[d].kecamatan;
+                    r["kab"]=rasgrup[d].kabupaten;
                     r["load"]=vdat[i];
-                    rasgrup[bridge[1]].colli=ras[bridge[1]].colli-vdat[i];
-                    vkap[i]-=ras[bridge[1]].colli;
+                    rasgrup[this.findIdx(gidx,bridge[1])].colli=rasgrup[d].colli-vdat[i];
+                    vkap[i]-=vdat[i];
                     colli_in_subroute[i]+=vdat[i]; 
                     sumC-=vdat[i]; 
-                    vdat[i]-=ras[bridge[1]].colli;
+                    vdat[i]-=vdat[i];
                   }
                 }
                 //jika kapasitas truk < kapasitas muatan dataran tinggi
                 else{
                   
                   //jika kapasitas truk > demand
-                    if(vkap[i]>=ras[bridge[1]].colli){
+                    if(vkap[i]>=rasgrup[d].colli){
                       //maka semua demand diantarkan
-                    r["index"]=ras[bridge[1]].$key;
-                    r["desa"]=ras[bridge[1]].desa;
-                    r["kecamatan"]=ras[bridge[1]].kecamatan;
-                    r["kab"]=ras[bridge[1]].kabupaten;
-                    r["load"]=ras[bridge[1]].colli;
-                    vdat[i]-=ras[bridge[1]].colli;
-                    vkap[i]-=ras[bridge[1]].colli;
-                    colli_in_subroute[i]=ras[bridge[1]].colli;
-                    sumC-=ras[bridge[1]].colli;
-                    rasgrup[this.findIdx(gidx,bridge[1])].colli=1;
+                    r["index"]=rasgrup[d].$key;
+                    r["desa"]=rasgrup[d].desa;
+                    r["kecamatan"]=rasgrup[d].kecamatan;
+                    r["kab"]=rasgrup[d].kabupaten;
+                    r["load"]=rasgrup[d].colli;
+                    vdat[i]-=rasgrup[d].colli;
+                    vkap[i]-=rasgrup[d].colli;
+                    colli_in_subroute[i]+=rasgrup[d].colli;
+                    sumC-=rasgrup[d].colli;
+                    rasgrup[this.findIdx(gidx,bridge[1])].colli=0;
                   }
                   //jika kapasitas truk < demand
                   else{
                     //maka sebagian demand diantarkan
-                    r["index"]=ras[bridge[1]].$key;
-                    r["desa"]=ras[bridge[1]].desa;
-                    r["kecamatan"]=ras[bridge[1]].kecamatan;
-                    r["kab"]=ras[bridge[1]].kabupaten;
+                    r["index"]=rasgrup[d].$key;
+                    r["desa"]=rasgrup[d].desa;
+                    r["kecamatan"]=rasgrup[d].kecamatan;
+                    r["kab"]=rasgrup[d].kabupaten;
                     r["load"]=vkap[i];
-                    rasgrup[bridge[1]].colli=ras[bridge[1]].colli-vkap[i];
+                    rasgrup[this.findIdx(gidx,bridge[1])].colli=rasgrup[d].colli-vkap[i];
                     vdat[i]-=vkap[i];
                     colli_in_subroute[i]+=vkap[i]; 
                     sumC-=vkap[i];
@@ -591,320 +677,808 @@ Routing(gidx:number){
               //bukan dataran tinggi
                 else{
                //jika kapasitas truk > demand
-                    if(this.vCap>=ras[bridge[1]].colli){
+                    if(vkap[i]>=rasgrup[d].colli){
                       //maka semua demand diantarkan
-                    r["index"]=ras[bridge[1]].$key;
-                    r["desa"]=ras[bridge[1]].desa;
-                    r["kecamatan"]=ras[bridge[1]].kecamatan;
-                    r["kab"]=ras[bridge[1]].kabupaten;
-                    r["load"]=ras[bridge[1]].colli;
+                    r["index"]=rasgrup[d].$key;
+                    r["desa"]=rasgrup[d].desa;
+                    r["kecamatan"]=rasgrup[d].kecamatan;
+                    r["kab"]=rasgrup[d].kabupaten;
+                    r["load"]=rasgrup[d].colli;
                     vdat[i]=this.vDating;
-                    vkap[i]-=ras[bridge[1]].colli;
-                    colli_in_subroute[i]=ras[bridge[1]].colli;
-                    sumC-=ras[bridge[1]].colli;
+                    vkap[i]-=rasgrup[d].colli;
+                    colli_in_subroute[i]+=rasgrup[d].colli;
+                    sumC-=rasgrup[d].colli;
                     rasgrup[this.findIdx(gidx,bridge[1])].colli=0;
                   }
                   //jika kapasitas truk < demand
                   else{
                     //maka sebagian demand diantarkan
-                     r["index"]=ras[bridge[1]].$key;
-                    r["desa"]=ras[bridge[1]].desa;
-                    r["kecamatan"]=ras[bridge[1]].kecamatan;
-                    r["kab"]=ras[bridge[1]].kabupaten;
+                     r["index"]=rasgrup[d].$key;
+                    r["desa"]=rasgrup[d].desa;
+                    r["kecamatan"]=rasgrup[d].kecamatan;
+                    r["kab"]=rasgrup[d].kabupaten;
                     r["load"]=vkap[i];
-                    rasgrup[bridge[1]].colli=ras[bridge[1]].colli-vkap[i];
+                    rasgrup[this.findIdx(gidx,bridge[1])].colli=rasgrup[d].colli-vkap[i];
                     vdat[i]=this.vDating;
                     colli_in_subroute[i]+=vkap[i]; 
                     sumC-=vkap[i];
-                    vkap[i]-=ras[bridge[1]].colli;
+                    vkap[i]-=vkap[i];
                   }
             }
             rute[i].push(r);
-            
+            }
+            if(vkap[i]==0){
+                vdat[i]=0;
+              }
+              
 
             i++;
           }
-          k++;
-    }
-    console.log(rute);
-         
-            
-     
- return resolve(true);
- });
-}
-
-
-//Generate Random route
-generateRoute(numberPopulation : number){
- return new Promise((resolve,reject) =>{
-   let idx_populasi=numberPopulation;
-   
-   let idx=0;
-   this.route=[];
-    this.sub_colli=[];
-    let cukupMax=0;
-    let stop=false;
- while(idx<idx_populasi&&!stop){
- this.route[idx]=[];
- let i=0; //index subroute
- let sumC=this.sum_colli;
- let gdg = this.deepCopy(this.gudang);
- let ras=this.deepCopy(this.rastra);
-  this.sub_colli[idx]=[];
- while(sumC>0){ // loop hingga semua colli ->menghasilkan 1 solusi=route=beberapa sub route
-   this.route[idx][i]=[];
-   let v_capacity=this.vCap; //kapasitas vehicle 8 ton =533 colli
-   let j=0; //index desa dalam sub route
-   let dating=false;
-   let v_dating=this.vDating;
-   let colli_in_subroute=0;
-      while(v_capacity>0 && v_dating>0 && sumC>0){ //loop hingga kapasitas kendaraan -> menghasilkan 1 sub route
-            this.route[idx][i][j]=[];
-            
-            var randomNumber = Math.floor(Math.random() * ras.length);
-          
-            //cek apakah desa merupakan dataran tinggi
-              if(j==0){
-                dating=this.isDataranTinggi(ras[randomNumber].desa,ras[randomNumber].kecamatan );
-                  
+          //jika ada=true dan not penuh=true maka tanyakan apakah demand telah diload semua
+          else{
+            if(ada==true && notpenuh==true && vkap[subrute]>0){
+              let indexSel=this.findIdx(gidx,selbridge);
+              if(vkap[subrute]==0){
+                vdat[subrute]=0;
               }
-              else{
-                if(!dating){
-                  dating=this.isDataranTinggi(ras[randomNumber].desa,ras[randomNumber].kecamatan );
-                }
-              }
-            
-             
-            //jika desa merupakan dataran tinggi
-            if(dating){
+              // console.log(rasgrup[indexSel].colli);
+              if(rasgrup[indexSel].colli>0){ //jika demand belum terpenuhi
+                 //console.log(vdat[subrute]+"_"+vkap[subrute]);
               
-                //jika kapasitas truk >= kapasitas muatan dataran tinggi
-                if(v_capacity>=v_dating){
-                     //jika kapasitas muatan dataran tinggi > demand
-                    if(v_dating>=ras[randomNumber].colli){
-                      //maka semua demand diantarkan
-                    this.route[idx][i][j]["index"]=ras[randomNumber].$key;
-                    this.route[idx][i][j]["desa"]=ras[randomNumber].desa;
-                    this.route[idx][i][j]["kecamatan"]=ras[randomNumber].kecamatan;
-                    this.route[idx][i][j]["kab"]=ras[randomNumber].kabupaten;
-                    this.route[idx][i][j]["load"]=ras[randomNumber].colli;
-                    v_capacity-=ras[randomNumber].colli;
-                    v_dating-=ras[randomNumber].colli;
-                    colli_in_subroute+=ras[randomNumber].colli;
-                    sumC-=ras[randomNumber].colli;
-                    ras.splice(randomNumber,1);
-                  }
-                  //jika kapasitas muatan dataran tinggi < demand
-                  else{
-                    //maka sebagian demand diantarkan
-                    this.route[idx][i][j]["index"]=ras[randomNumber].$key;
-                    this.route[idx][i][j]["desa"]=ras[randomNumber].desa;
-                    this.route[idx][i][j]["kecamatan"]=ras[randomNumber].kecamatan;
-                    this.route[idx][i][j]["kab"]=ras[randomNumber].kabupaten;
-                    this.route[idx][i][j]["load"]=v_dating;
-                    ras[randomNumber].colli=ras[randomNumber].colli-v_dating;
-                    v_capacity-=v_dating;
-                    colli_in_subroute+=v_dating; 
-                    sumC-=v_dating; 
-                    v_dating-=v_dating;
-                  }
-                }
-                //jika kapasitas truk < kapasitas muatan dataran tinggi
-                else{
+              let r=[];
+              //apakah desa termasuk dating
+              if(this.isDataranTinggi(rasgrup[indexSel].desa,rasgrup[indexSel].kecamatan)){
+                //jika dating, maka apakah desa berada di belakang rute?
+                if(nmras!=0){
                   
-                  //jika kapasitas truk > demand
-                    if(v_capacity>=ras[randomNumber].colli){
-                      //maka semua demand diantarkan
-                    this.route[idx][i][j]["index"]=ras[randomNumber].$key;
-                    this.route[idx][i][j]["desa"]=ras[randomNumber].desa;
-                    this.route[idx][i][j]["kecamatan"]=ras[randomNumber].kecamatan;
-                    this.route[idx][i][j]["kab"]=ras[randomNumber].kabupaten;
-                    this.route[idx][i][j]["load"]=ras[randomNumber].colli;
-                    v_capacity-=ras[randomNumber].colli;
-                    v_dating-=ras[randomNumber].colli;
-                    colli_in_subroute+=ras[randomNumber].colli;
-                    sumC-=ras[randomNumber].colli;
-                    ras.splice(randomNumber,1);
-                  }
-                  //jika kapasitas truk < demand
-                  else{
-                    //maka sebagian demand diantarkan
-                    this.route[idx][i][j]["index"]=ras[randomNumber].$key;
-                    this.route[idx][i][j]["desa"]=ras[randomNumber].desa;
-                    this.route[idx][i][j]["kecamatan"]=ras[randomNumber].kecamatan;
-                    this.route[idx][i][j]["kab"]=ras[randomNumber].kabupaten;
-                    this.route[idx][i][j]["load"]=v_capacity;
-                    ras[randomNumber].colli=ras[randomNumber].colli-v_capacity;
-                    v_dating-=v_capacity;
-                    colli_in_subroute+=v_capacity;
-                    sumC-=v_capacity;
-                    v_capacity-=v_capacity;
-                  }
+                      if(datingFlag[subrute]){//jika dataran tinggi
+                        datingFlag[i]=true;
+                        //jika kapasitas truk >= kapasitas muatan dataran tinggi
+                      if(vkap[subrute]>=vdat[subrute]){
+                      //jika kapasitas muatan dataran tinggi > demand
+                          if(vdat[subrute]>=rasgrup[indexSel].colli){
+                            //maka semua demand diantarkan
+                          r["index"]=rasgrup[indexSel].$key;
+                          r["desa"]=rasgrup[indexSel].desa;
+                          r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                          r["kab"]=rasgrup[indexSel].kabupaten;
+                          r["load"]=rasgrup[indexSel].colli;
+                          vdat[subrute]-=rasgrup[indexSel].colli;
+                          vkap[subrute]-=rasgrup[indexSel].colli;
+                          colli_in_subroute[subrute]+=rasgrup[indexSel].colli;
+                          sumC-=rasgrup[indexSel].colli;
+                          rasgrup[indexSel].colli=0;
+                        }
+                        //jika kapasitas muatan dataran tinggi < demand
+                        else{
+                          //maka sebagian demand diantarkan
+                          r["index"]=rasgrup[indexSel].$key;
+                          r["desa"]=rasgrup[indexSel].desa;
+                          r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                          r["kab"]=rasgrup[indexSel].kabupaten;
+                          r["load"]=vdat[subrute];
+                          rasgrup[indexSel].colli=rasgrup[indexSel].colli-vdat[subrute];
+                          vkap[subrute]-=vdat[subrute];
+                          colli_in_subroute[subrute]+=vdat[subrute]; 
+                          sumC-=vdat[subrute]; 
+                          vdat[subrute]-=vdat[subrute];
+                        }
+                      }
+                      //jika kapasitas truk < kapasitas muatan dataran tinggi
+                      else{
+                        
+                        //jika kapasitas truk > demand
+                          if(vkap[subrute]>=rasgrup[indexSel].colli){
+                            //maka semua demand diantarkan
+                          r["index"]=rasgrup[indexSel].$key;
+                          r["desa"]=rasgrup[indexSel].desa;
+                          r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                          r["kab"]=rasgrup[indexSel].kabupaten;
+                          r["load"]=rasgrup[indexSel].colli;
+                          vdat[subrute]-=rasgrup[indexSel].colli;
+                          vkap[subrute]-=rasgrup[indexSel].colli;
+                          colli_in_subroute[subrute]+=rasgrup[indexSel].colli;
+                          sumC-=rasgrup[indexSel].colli;
+                          rasgrup[indexSel].colli=0;
+                        }
+                        //jika kapasitas truk < demand
+                        else{
+                          //maka sebagian demand diantarkan
+                          r["index"]=rasgrup[indexSel].$key;
+                          r["desa"]=rasgrup[indexSel].desa;
+                          r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                          r["kab"]=rasgrup[indexSel].kabupaten;
+                          r["load"]=vkap[subrute];
+                          rasgrup[indexSel].colli=rasgrup[indexSel].colli-vkap[subrute];
+                          vdat[subrute]-=vkap[subrute];
+                          colli_in_subroute[subrute]+=vkap[subrute]; 
+                          sumC-=vkap[subrute];
+                          vkap[subrute]-=vkap[subrute];
+                        }
 
+                      }
+                    }
+                    //bukan dataran tinggi
+                      else{
+                    //jika kapasitas truk > demand
+                          if(vkap[subrute]>=rasgrup[indexSel].colli){
+                            //maka semua demand diantarkan
+                          r["index"]=rasgrup[indexSel].$key;
+                          r["desa"]=rasgrup[indexSel].desa;
+                          r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                          r["kab"]=rasgrup[indexSel].kabupaten;
+                          r["load"]=rasgrup[indexSel].colli;
+                          vdat[subrute]=this.vDating;
+                          vkap[subrute]-=rasgrup[indexSel].colli;
+                          colli_in_subroute[subrute]+=rasgrup[indexSel].colli;
+                          sumC-=rasgrup[indexSel].colli;
+                          rasgrup[indexSel].colli=0;
+                        }
+                        //jika kapasitas truk < demand
+                        else{
+                          //maka sebagian demand diantarkan
+                          r["index"]=rasgrup[indexSel].$key;
+                          r["desa"]=rasgrup[indexSel].desa;
+                          r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                          r["kab"]=rasgrup[indexSel].kabupaten;
+                          r["load"]=vkap[subrute];
+                          rasgrup[indexSel].colli=rasgrup[indexSel].colli-vkap[subrute];
+                          vdat[subrute]=this.vDating;
+                          colli_in_subroute[subrute]+=vkap[subrute]; 
+                          sumC-=vkap[subrute];
+                          vkap[subrute]-=vkap[subrute];
+                        }
+                  }
+                  rute[subrute].push(r); //memasukkan customer dating ke cust paing akhir di rute
                 }
-            }
-            //jika desa bukan dataran tinggi
-            else{
-               //jika kapasitas truk > demand
-                    if(v_capacity>=ras[randomNumber].colli){
-                      //maka semua demand diantarkan
-                    this.route[idx][i][j]["index"]=ras[randomNumber].$key;
-                    this.route[idx][i][j]["desa"]=ras[randomNumber].desa;
-                    this.route[idx][i][j]["kecamatan"]=ras[randomNumber].kecamatan;
-                    this.route[idx][i][j]["kab"]=ras[randomNumber].kabupaten;
-                    this.route[idx][i][j]["load"]=ras[randomNumber].colli;
-                    v_capacity-=ras[randomNumber].colli;
-                    colli_in_subroute+=ras[randomNumber].colli;
-                    sumC-=ras[randomNumber].colli;
-                    ras.splice(randomNumber,1);
-                  }
-                  //jika kapasitas truk < demand
-                  else{
-                    //maka sebagian demand diantarkan
-                    this.route[idx][i][j]["index"]=ras[randomNumber].$key;
-                    this.route[idx][i][j]["desa"]=ras[randomNumber].desa;
-                    this.route[idx][i][j]["kecamatan"]=ras[randomNumber].kecamatan;
-                    this.route[idx][i][j]["kab"]=ras[randomNumber].kabupaten;
-                    this.route[idx][i][j]["load"]=v_capacity;
-                    ras[randomNumber].colli=ras[randomNumber].colli-v_capacity;
-                    colli_in_subroute+=v_capacity;
-                     sumC-=v_capacity;
-                    v_capacity-=v_capacity;
-                   
-                  }
-            }
+
+              }
+              //jika bukan desa datran tinggi
+               else{
+                 //apakah di depan rute?
+                 if(nmras==0){ //di depan rute
+                      if(datingFlag[subrute] && vdat[subrute]>0){//jika dataran tinggi
+                          //jika kapasitas truk >= kapasitas muatan dataran tinggi
+                        if(vkap[subrute]>=vdat[subrute]){
+                        //jika kapasitas muatan dataran tinggi > demand
+                            if(vdat[subrute]>=rasgrup[indexSel].colli){
+                              //maka semua demand diantarkan
+                            r["index"]=rasgrup[indexSel].$key;
+                            r["desa"]=rasgrup[indexSel].desa;
+                            r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                            r["kab"]=rasgrup[indexSel].kabupaten;
+                            r["load"]=rasgrup[indexSel].colli;
+                            vdat[subrute]-=rasgrup[indexSel].colli;
+                            vkap[subrute]-=rasgrup[indexSel].colli;
+                            colli_in_subroute[subrute]+=rasgrup[indexSel].colli;
+                            sumC-=rasgrup[indexSel].colli;
+                            rasgrup[indexSel].colli=0;
+                          }
+                          //jika kapasitas muatan dataran tinggi < demand
+                          else{
+                            //maka sebagian demand diantarkan
+                            r["index"]=rasgrup[indexSel].$key;
+                            r["desa"]=rasgrup[indexSel].desa;
+                            r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                            r["kab"]=rasgrup[indexSel].kabupaten;
+                            r["load"]=vdat[subrute];
+                            rasgrup[indexSel].colli=rasgrup[indexSel].colli-vdat[subrute];
+                            vkap[subrute]-=vdat[subrute];
+                            colli_in_subroute[subrute]+=vdat[subrute]; 
+                            sumC-=vdat[subrute]; 
+                            vdat[subrute]-=vdat[subrute];
+                          }
+                        }
+                        //jika kapasitas truk < kapasitas muatan dataran tinggi
+                        else{
+                          
+                          //jika kapasitas truk > demand
+                            if(vkap[subrute]>=rasgrup[indexSel].colli){
+                              //maka semua demand diantarkan
+                            r["index"]=rasgrup[indexSel].$key;
+                            r["desa"]=rasgrup[indexSel].desa;
+                            r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                            r["kab"]=rasgrup[indexSel].kabupaten;
+                            r["load"]=rasgrup[indexSel].colli;
+                            vdat[subrute]-=rasgrup[indexSel].colli;
+                            vkap[subrute]-=rasgrup[indexSel].colli;
+                            colli_in_subroute[subrute]+=rasgrup[indexSel].colli;
+                            sumC-=rasgrup[indexSel].colli;
+                            rasgrup[indexSel].colli=0;
+                          }
+                          //jika kapasitas truk < demand
+                          else{
+                            //maka sebagian demand diantarkan
+                            r["index"]=rasgrup[indexSel].$key;
+                            r["desa"]=rasgrup[indexSel].desa;
+                            r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                            r["kab"]=rasgrup[indexSel].kabupaten;
+                            r["load"]=vkap[subrute];
+                            rasgrup[indexSel].colli=rasgrup[indexSel].colli-vkap[subrute];
+                            vdat[subrute]-=vkap[subrute];
+                            colli_in_subroute[subrute]+=vkap[subrute]; 
+                            sumC-=vkap[subrute];
+                            vkap[subrute]-=vkap[subrute];
+                          }
+
+                        }
+                      }
+                      //bukan dataran tinggi
+                        else{
+                      //jika kapasitas truk > demand
+                            if(vkap[subrute]>=rasgrup[indexSel].colli){
+                              //maka semua demand diantarkan
+                            r["index"]=rasgrup[indexSel].$key;
+                            r["desa"]=rasgrup[indexSel].desa;
+                            r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                            r["kab"]=rasgrup[indexSel].kabupaten;
+                            r["load"]=rasgrup[indexSel].colli;
+                            vdat[subrute]=this.vDating;
+                            vkap[subrute]-=rasgrup[indexSel].colli;
+                            colli_in_subroute[subrute]+=rasgrup[indexSel].colli;
+                            sumC-=rasgrup[indexSel].colli;
+                            rasgrup[indexSel].colli=0;
+                          }
+                          //jika kapasitas truk < demand
+                          else{
+                            //maka sebagian demand diantarkan
+                            r["index"]=rasgrup[indexSel].$key;
+                            r["desa"]=rasgrup[indexSel].desa;
+                            r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                            r["kab"]=rasgrup[indexSel].kabupaten;
+                            r["load"]=vkap[subrute];
+                            rasgrup[indexSel].colli=rasgrup[indexSel].colli-vkap[subrute];
+                            vdat[subrute]=this.vDating;
+                            colli_in_subroute[subrute]+=vkap[subrute]; 
+                            sumC-=vkap[subrute];
+                            vkap[subrute]-=vkap[subrute];
+                          }
+                    }
+                    rute[subrute].unshift(r); //memasukkan customer dating ke cust paing depan di rute
+                 }
+
+                 else{//di belakang
+                          if(datingFlag[subrute] && vdat[subrute]>0){//jika dataran tinggi
+                                //jika kapasitas truk >= kapasitas muatan dataran tinggi
+                              if(vkap[subrute]>=vdat[subrute]){
+                              //jika kapasitas muatan dataran tinggi > demand
+                                  if(vdat[subrute]>=rasgrup[indexSel].colli){
+                                    //maka semua demand diantarkan
+                                  r["index"]=rasgrup[indexSel].$key;
+                                  r["desa"]=rasgrup[indexSel].desa;
+                                  r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                                  r["kab"]=rasgrup[indexSel].kabupaten;
+                                  r["load"]=rasgrup[indexSel].colli;
+                                  vdat[subrute]-=rasgrup[indexSel].colli;
+                                  vkap[subrute]-=rasgrup[indexSel].colli;
+                                  colli_in_subroute[subrute]+=rasgrup[indexSel].colli;
+                                  sumC-=rasgrup[indexSel].colli;
+                                  rasgrup[indexSel].colli=0;
+                                }
+                                //jika kapasitas muatan dataran tinggi < demand
+                                else{
+                                  //maka sebagian demand diantarkan
+                                  r["index"]=rasgrup[indexSel].$key;
+                                  r["desa"]=rasgrup[indexSel].desa;
+                                  r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                                  r["kab"]=rasgrup[indexSel].kabupaten;
+                                  r["load"]=vdat[subrute];
+                                  rasgrup[indexSel].colli=rasgrup[indexSel].colli-vdat[subrute];
+                                  vkap[subrute]-=vdat[subrute];
+                                  colli_in_subroute[subrute]+=vdat[subrute]; 
+                                  sumC-=vdat[subrute]; 
+                                  vdat[subrute]-=vdat[subrute];
+                                }
+                              }
+                              //jika kapasitas truk < kapasitas muatan dataran tinggi
+                              else{
+                                
+                                //jika kapasitas truk > demand
+                                  if(vkap[subrute]>=rasgrup[indexSel].colli){
+                                    //maka semua demand diantarkan
+                                  r["index"]=rasgrup[indexSel].$key;
+                                  r["desa"]=rasgrup[indexSel].desa;
+                                  r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                                  r["kab"]=rasgrup[indexSel].kabupaten;
+                                  r["load"]=rasgrup[indexSel].colli;
+                                  vdat[subrute]-=rasgrup[indexSel].colli;
+                                  vkap[subrute]-=rasgrup[indexSel].colli;
+                                  colli_in_subroute[subrute]+=rasgrup[indexSel].colli;
+                                  sumC-=rasgrup[indexSel].colli;
+                                  rasgrup[indexSel].colli=0;
+                                }
+                                //jika kapasitas truk < demand
+                                else{
+                                  //maka sebagian demand diantarkan
+                                  r["index"]=rasgrup[indexSel].$key;
+                                  r["desa"]=rasgrup[indexSel].desa;
+                                  r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                                  r["kab"]=rasgrup[indexSel].kabupaten;
+                                  r["load"]=vkap[subrute];
+                                  rasgrup[indexSel].colli=rasgrup[indexSel].colli-vkap[subrute];
+                                  vdat[subrute]-=vkap[subrute];
+                                  colli_in_subroute[subrute]+=vkap[subrute]; 
+                                  sumC-=vkap[subrute];
+                                  vkap[subrute]-=vkap[subrute];
+                                }
+
+                              }
+                            }
+                            //bukan dataran tinggi
+                              else{
+                            //jika kapasitas truk > demand
+                                  if(vkap[subrute]>=rasgrup[indexSel].colli){
+                                    //maka semua demand diantarkan
+                                  r["index"]=rasgrup[indexSel].$key;
+                                  r["desa"]=rasgrup[indexSel].desa;
+                                  r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                                  r["kab"]=rasgrup[indexSel].kabupaten;
+                                  r["load"]=rasgrup[indexSel].colli;
+                                  vdat[subrute]=this.vDating;
+                                  vkap[subrute]-=rasgrup[indexSel].colli;
+                                  colli_in_subroute[subrute]+=rasgrup[indexSel].colli;
+                                  sumC-=rasgrup[indexSel].colli;
+                                  rasgrup[indexSel].colli=0;
+                                }
+                                //jika kapasitas truk < demand
+                                else{
+                                  //maka sebagian demand diantarkan
+                                  r["index"]=rasgrup[indexSel].$key;
+                                  r["desa"]=rasgrup[indexSel].desa;
+                                  r["kecamatan"]=rasgrup[indexSel].kecamatan;
+                                  r["kab"]=rasgrup[indexSel].kabupaten;
+                                  r["load"]=vkap[subrute];
+                                  rasgrup[indexSel].colli=rasgrup[indexSel].colli-vkap[subrute];
+                                  vdat[subrute]=this.vDating;
+                                  colli_in_subroute[subrute]+=vkap[subrute]; 
+                                  sumC-=vkap[subrute];
+                                  vkap[subrute]-=vkap[subrute];
+                                }
+                          }
+                          rute[subrute].push(r); //memasukkan customer dating ke cust paing depan di rute
+                 }
+               }//end else bukan cust dataran tinggi
                
-              j++;
-            }
-            this.sub_colli[idx][i]=colli_in_subroute;
-         
-i++;
 
- }
- let cukup=this.isEnoughStok(this.sub_colli[idx],gdg);
- //console.log(cukup);
- if(cukup){
-  idx++;
-  cukupMax=0;
- }
- else{
- 
-  if(cukupMax==10){
-    stop=true;
-  }
-   cukupMax++;
- }
- 
- }
- return resolve(true);
- });
-}
-//random gudang pengirim
-generateDepot(numberPopulation:number, subcol:number[][]){
- 
-  return new Promise((resolve,reject) =>{
-  let idx=0;
-
-  let f_gudang:number[][]=[]; 
-  while(idx<numberPopulation){ //loop sebanyak number of population
-      let gdg=this.deepCopy(this.gudang); //data stok gudang
-      let j=0;
-      f_gudang[idx]=[];
-      let stop=false;
-      let countStop=0;
-      while(j<this.route[idx].length&&!stop){   //loop sebanyak sub route dalam satu populasi
-        if(gdg.length==0){
-          break;
-        }
-        
-
-        var randomNumber = Math.floor(Math.random() * gdg.length);
-           let jml=Math.floor((gdg[randomNumber].stok*1000/15));
-            if(subcol[idx][j]<=jml){
-              f_gudang[idx][j]=randomNumber;
-              gdg[randomNumber].stok-=subcol[idx][j]*15/1000;
-              if(gdg[randomNumber].stok==0){
-                gdg.splice(randomNumber,1);
               }
-              countStop=0;
-              j++
-            }
-            //else jika stok tidak mencukupi maka random gudang lagi;
+            }//endif else of ada=true && notpenuh=true
             else{
-              
-              if(countStop==10){ //jika sampai 10 kali tidak ditemukan
-                //console.log("No Random");
-                let x=0;
-                let ketemu=false;
-                while(x<gdg.length&&!ketemu){
-                  jml=Math.floor((gdg[x]['stok']*1000/15));
-                  if(subcol[idx][j]<=jml){
-                  f_gudang[idx][j]=x;
-                  gdg[x].stok-=subcol[idx][j]*15/1000;
-                  if(gdg[x].stok==0){
-                    gdg.splice(x,1);
+              if(ada==true && notpenuh==false){
+                //membuat rute baru
+                let indexnew1=this.findIdx(gidx,bridge[0]);
+                let indexnew2=this.findIdx(gidx,bridge[1]);
+              //   if(rasgrup[indexnew1].colli==0){
+              //   indexnew1=this.findIdx(gidx,bridge[1]);
+              //   indexnew2=this.findIdx(gidx,bridge[0]);
+              //   console.log('swap');
+              // }
+                if(rasgrup[indexnew1].colli>0&&rasgrup[indexnew2].colli>0){
+                  
+                   
+                  
+                    rute[i]=[];
+                    colli_in_subroute[i]=0;
+                    let r=[];
+                      if(this.isDataranTinggi(rasgrup[indexnew1].desa,rasgrup[indexnew1].kecamatan )){//jika dataran tinggi
+                      datingFlag[i]=true;
+                      //jika kapasitas muatan dataran tinggi > demand
+                      
+                          if(this.vDating>=rasgrup[indexnew1].colli){
+                            //maka semua demand diantarkan
+                          r["index"]=rasgrup[indexnew1].$key;
+                          r["desa"]=rasgrup[indexnew1].desa;
+                          r["kecamatan"]=rasgrup[indexnew1].kecamatan;
+                          r["kab"]=rasgrup[indexnew1].kabupaten;
+                          r["load"]=rasgrup[indexnew1].colli;
+                          vdat[i]=this.vDating-rasgrup[indexnew1].colli;
+                          vkap[i]=this.vCap-rasgrup[indexnew1].colli;
+                          colli_in_subroute[i]+=rasgrup[indexnew1].colli;
+                          sumC-=rasgrup[indexnew1].colli;
+                          rasgrup[indexnew1].colli=0;
+                        }
+                        //jika kapasitas muatan dataran tinggi < demand
+                        else{
+                          //maka sebagian demand diantarkan
+                          r["index"]=rasgrup[indexnew1].$key;
+                          r["desa"]=rasgrup[indexnew1].desa;
+                          r["kecamatan"]=rasgrup[indexnew1].kecamatan;
+                          r["kab"]=rasgrup[indexnew1].kabupaten;
+                          r["load"]=this.vDating;
+                          rasgrup[indexnew1].colli=rasgrup[indexnew1].colli-this.vDating;
+                          vdat[i]=this.vDating-this.vDating;
+                          vkap[i]=this.vCap-this.vDating;
+                          colli_in_subroute[i]+=this.vDating; 
+                          sumC-=this.vDating; 
+                        }
+                      }
+                      //bukan dataran tinggi
+                      else{
+                        datingFlag[i]=false;
+                    //jika kapasitas truk > demand
+                          if(this.vCap>=rasgrup[indexnew1].colli){
+                            //maka semua demand diantarkan
+                          r["index"]=rasgrup[indexnew1].$key;
+                          r["desa"]=rasgrup[indexnew1].desa;
+                          r["kecamatan"]=rasgrup[indexnew1].kecamatan;
+                          r["kab"]=rasgrup[indexnew1].kabupaten;
+                          r["load"]=rasgrup[indexnew1].colli;
+                          vdat[i]=this.vDating;
+                          vkap[i]=this.vCap-rasgrup[indexnew1].colli;
+                          colli_in_subroute[i]+=rasgrup[indexnew1].colli;
+                          sumC-=rasgrup[indexnew1].colli;
+                          rasgrup[indexnew1].colli=0;
+                        }
+                        //jika kapasitas truk < demand
+                        else{
+                          //maka sebagian demand diantarkan
+                          r["index"]=rasgrup[indexnew1].$key;
+                          r["desa"]=rasgrup[indexnew1].desa;
+                          r["kecamatan"]=rasgrup[indexnew1].kecamatan;
+                          r["kab"]=rasgrup[indexnew1].kabupaten;
+                          r["load"]=this.vCap;
+                          rasgrup[indexnew1].colli=rasgrup[indexnew1].colli-this.vCap;
+                          vdat[i]=this.vDating;
+                          vkap[i]=this.vCap-this.vCap;
+                          colli_in_subroute[i]+=this.vCap; 
+                          sumC-=this.vCap;
+                        }
+                         
                   }
-                  countStop=0;
-                  j++
-                  ketemu=true;
+                  rute[i].push(r);
+
+                  //memasukkan bridge kedua
+                  if(vdat[i]>0 && vkap[i]>0&&rasgrup[indexnew2].colli>0) {
+                  r=[];
+                  datingFlag[i]=this.isDataranTinggi(rasgrup[indexnew2].desa,rasgrup[indexnew1].kecamatan);
+                      if(datingFlag[i] ){//jika dataran tinggi
+                        //jika kapasitas truk >= kapasitas muatan dataran tinggi
+                      if(vkap[i]>=vdat[i]){
+                      //jika kapasitas muatan dataran tinggi > demand
+                          if(vdat[i]>=rasgrup[indexnew2].colli){
+                            //maka semua demand diantarkan
+                          r["index"]=rasgrup[indexnew2].$key;
+                          r["desa"]=rasgrup[indexnew2].desa;
+                          r["kecamatan"]=rasgrup[indexnew2].kecamatan;
+                          r["kab"]=rasgrup[indexnew2].kabupaten;
+                          r["load"]=rasgrup[indexnew2].colli;
+                          vdat[i]-=rasgrup[indexnew2].colli;
+                          vkap[i]-=rasgrup[indexnew2].colli;
+                          colli_in_subroute[i]+=rasgrup[indexnew2].colli;
+                          sumC-=rasgrup[indexnew2].colli;
+                          rasgrup[indexnew2].colli=0;
+                        }
+                        //jika kapasitas muatan dataran tinggi < demand
+                        else{
+                          //maka sebagian demand diantarkan
+                          r["index"]=rasgrup[indexnew2].$key;
+                          r["desa"]=rasgrup[indexnew2].desa;
+                          r["kecamatan"]=rasgrup[indexnew2].kecamatan;
+                          r["kab"]=rasgrup[indexnew2].kabupaten;
+                          r["load"]=vdat[i];
+                          rasgrup[indexnew2].colli=rasgrup[indexnew2].colli-vdat[i];
+                          vkap[i]-=vdat[i];
+                          colli_in_subroute[i]+=vdat[i]; 
+                          sumC-=vdat[i]; 
+                          vdat[i]-=vdat[i];
+                        }
+                      }
+                      //jika kapasitas truk < kapasitas muatan dataran tinggi
+                      else{
+                        
+                        //jika kapasitas truk > demand
+                          if(vkap[i]>=rasgrup[indexnew2].colli){
+                            //maka semua demand diantarkan
+                          r["index"]=rasgrup[indexnew2].$key;
+                          r["desa"]=rasgrup[indexnew2].desa;
+                          r["kecamatan"]=rasgrup[indexnew2].kecamatan;
+                          r["kab"]=rasgrup[indexnew2].kabupaten;
+                          r["load"]=rasgrup[indexnew2].colli;
+                          vdat[i]-=rasgrup[indexnew2].colli;
+                          vkap[i]-=rasgrup[indexnew2].colli;
+                          colli_in_subroute[i]+=rasgrup[indexnew2].colli;
+                          sumC-=rasgrup[indexnew2].colli;
+                          rasgrup[indexnew2].colli=0;
+                        }
+                        //jika kapasitas truk < demand
+                        else{
+                          //maka sebagian demand diantarkan
+                          r["index"]=rasgrup[indexnew2].$key;
+                          r["desa"]=rasgrup[indexnew2].desa;
+                          r["kecamatan"]=rasgrup[indexnew2].kecamatan;
+                          r["kab"]=rasgrup[indexnew2].kabupaten;
+                          r["load"]=vkap[i];
+                          rasgrup[indexnew2].colli=rasgrup[indexnew2].colli-vkap[i];
+                          vdat[i]-=vkap[i];
+                          colli_in_subroute[i]+=vkap[i]; 
+                          sumC-=vkap[i];
+                          vkap[i]-=vkap[i];
+                        }
+
+                      }
+                    }
+                    //bukan dataran tinggi
+                      else{
+                    //jika kapasitas truk > demand
+                          if(vkap[i]>=rasgrup[indexnew2].colli){
+                            //maka semua demand diantarkan
+                          r["index"]=rasgrup[indexnew2].$key;
+                          r["desa"]=rasgrup[indexnew2].desa;
+                          r["kecamatan"]=rasgrup[indexnew2].kecamatan;
+                          r["kab"]=rasgrup[indexnew2].kabupaten;
+                          r["load"]=rasgrup[indexnew2].colli;
+                          vdat[i]=this.vDating;
+                          vkap[i]-=rasgrup[indexnew2].colli;
+                          colli_in_subroute[i]+=rasgrup[indexnew2].colli;
+                          sumC-=rasgrup[indexnew2].colli;
+                          rasgrup[indexnew2].colli=0;
+                        }
+                        //jika kapasitas truk < demand
+                        else{
+                          //maka sebagian demand diantarkan
+                          r["index"]=rasgrup[indexnew2].$key;
+                          r["desa"]=rasgrup[indexnew2].desa;
+                          r["kecamatan"]=rasgrup[indexnew2].kecamatan;
+                          r["kab"]=rasgrup[indexnew2].kabupaten;
+                          r["load"]=vkap[i];
+                          rasgrup[indexnew2].colli=rasgrup[indexnew2].colli-vkap[i];
+                          vdat[i]=this.vDating;
+                          colli_in_subroute[i]+=vkap[i]; 
+                          sumC-=vkap[i];
+                          vkap[i]-=vkap[i];
+                        }
+                       
+                  }
+                  rute[i].push(r);
+                  }
+                  if(vkap[i]==0){
+                    vdat[i]=0;
+                  }
+                  i++;
                 }
-                x++;
-              }
-              //console.log(idx+"_"+ketemu);
-              if(ketemu==false){
-                stop=true;
-                break;
-              }
-                
-              }else{
-                countStop++;
+
+
               }
             }
-      }
-      if(stop==true){
-        f_gudang.pop();
-                break;
-              }
-          idx++;
-      }
-      return resolve(f_gudang);
+          }
+    }
+          k++;
+          
+    }
+    let list=this.getUnassignCust(rasgrup);
+    let e=0;
+    while(sumC>0&& e<list.length){
+      
+                    let indexnew1=this.findIdx(gidx,list[e]);
+                   rute[i]=[];
+                    colli_in_subroute[i]=0;
+                    let r=[];
+                      if(this.isDataranTinggi(rasgrup[indexnew1].desa,rasgrup[indexnew1].kecamatan )){//jika dataran tinggi
+                      datingFlag[i]=true;
+                      //jika kapasitas muatan dataran tinggi > demand
+                      
+                          if(this.vDating>=rasgrup[indexnew1].colli){
+                            //maka semua demand diantarkan
+                          r["index"]=rasgrup[indexnew1].$key;
+                          r["desa"]=rasgrup[indexnew1].desa;
+                          r["kecamatan"]=rasgrup[indexnew1].kecamatan;
+                          r["kab"]=rasgrup[indexnew1].kabupaten;
+                          r["load"]=rasgrup[indexnew1].colli;
+                          vdat[i]=this.vDating-rasgrup[indexnew1].colli;
+                          vkap[i]=this.vCap-rasgrup[indexnew1].colli;
+                          colli_in_subroute[i]+=rasgrup[indexnew1].colli;
+                          sumC-=rasgrup[indexnew1].colli;
+                          rasgrup[indexnew1].colli=0;
+                        }
+                        //jika kapasitas muatan dataran tinggi < demand
+                        else{
+                          //maka sebagian demand diantarkan
+                          r["index"]=rasgrup[indexnew1].$key;
+                          r["desa"]=rasgrup[indexnew1].desa;
+                          r["kecamatan"]=rasgrup[indexnew1].kecamatan;
+                          r["kab"]=rasgrup[indexnew1].kabupaten;
+                          r["load"]=this.vDating;
+                          rasgrup[indexnew1].colli=rasgrup[indexnew1].colli-this.vDating;
+                          vdat[i]=this.vDating-this.vDating;
+                          vkap[i]=this.vCap-this.vDating;
+                          colli_in_subroute[i]+=this.vDating; 
+                          sumC-=this.vDating; 
+                        }
+                      }
+                      //bukan dataran tinggi
+                      else{
+                        datingFlag[i]=false;
+                    //jika kapasitas truk > demand
+                          if(this.vCap>=rasgrup[indexnew1].colli){
+                            //maka semua demand diantarkan
+                          r["index"]=rasgrup[indexnew1].$key;
+                          r["desa"]=rasgrup[indexnew1].desa;
+                          r["kecamatan"]=rasgrup[indexnew1].kecamatan;
+                          r["kab"]=rasgrup[indexnew1].kabupaten;
+                          r["load"]=rasgrup[indexnew1].colli;
+                          vdat[i]=this.vDating;
+                          vkap[i]=this.vCap-rasgrup[indexnew1].colli;
+                          colli_in_subroute[i]+=rasgrup[indexnew1].colli;
+                          sumC-=rasgrup[indexnew1].colli;
+                          rasgrup[indexnew1].colli=0;
+                        }
+                        //jika kapasitas truk < demand
+                        else{
+                          //maka sebagian demand diantarkan
+                          r["index"]=rasgrup[indexnew1].$key;
+                          r["desa"]=rasgrup[indexnew1].desa;
+                          r["kecamatan"]=rasgrup[indexnew1].kecamatan;
+                          r["kab"]=rasgrup[indexnew1].kabupaten;
+                          r["load"]=this.vCap;
+                          rasgrup[indexnew1].colli=rasgrup[indexnew1].colli-this.vCap;
+                          vdat[i]=this.vDating;
+                          vkap[i]=this.vCap-this.vCap;
+                          colli_in_subroute[i]+=this.vCap; 
+                          sumC-=this.vCap;
+                        }
+                         
+                  }
+                  rute[i].push(r);
 
-    });
+                  
+
+                  i++;
+                  e++;
+    }
+
+    for(let z=0;z<ruteGrup[gidx].length;z++){
+      kromosom.push(ruteGrup[gidx][z]);
+      colli_on_Subroute.push(subColli[gidx][z]);
+      fgd.push(gidx);
+      datFlag.push(dating_flag_or[gidx][z]);
+      vdatshow.push(false);
+      vkapshow.push(false);
+      
+    }
+    if(rute[0].length>0){
+      for(let y=0;y<rute.length;y++){
+       kromosom.push(rute[y]);
+       colli_on_Subroute.push(colli_in_subroute[y]);
+       fgd.push(gidx);
+       datFlag.push(datingFlag[y]);
+       vdatshow.push(vdat[y]);
+      vkapshow.push(vkap[y]);
   }
-//evaluasi populasi
+    }
+  
+    
+    gidx++;
 
-evaluasiPopulasi(route: any[][][][], f_gudang:number[][]):any[]{
+}
+console.log(kromosom);
+console.log(fgd);
+console.log(colli_on_Subroute);
+console.log(datFlag);
+
+return [kromosom,fgd,colli_on_Subroute,datFlag] ;
+ 
+}
+//scheduliang phase
+scheduling(population : any[][][][], datFlag: any[][], fromgud: any[][]){
+  return new Promise((resolve,reject) =>{
+  
+  let pol=[];
+  for(let i=0; i<population.length;i++){
+  pol[i]=[];
+    for(let j=0;j<population[i].length;j++){
+      let newSubrute=[];
+      //apakah dataran tinggi?
+      if(!datFlag[i][j]&&population[i][j].length>1){
+        
+        //jika bukan dataran tinggi cari dea paling dekat dengan gudang
+        let subRute=this.deepCopy(population[i][j]);
+        let k=0;
+        let selectedDesa=0;
+        let idxSelected=population[i][j][k]['index'];
+        let min=Number(this.distance[fromgud[i][j]][population[i][j][k]['index']+7]);
+        k++;
+        while(k<population[i][j].length){
+          if(min>Number(this.distance[fromgud[i][j]][population[i][j][k]['index']+7])){
+            min=Number(this.distance[fromgud[i][j]][population[i][j][k]['index']+7]);
+            selectedDesa=k;
+            idxSelected=population[i][j][k]['index'];
+          }
+          k++;
+        }
+        newSubrute.push(this.deepCopy(population[i][j][selectedDesa]));
+        subRute.splice(selectedDesa,1);
+        if(subRute.length>1){
+          for(let l=0;l<subRute.length;l++){
+            let m=0;
+            let selectedDesa=0;
+            let min=Number(this.distance[idxSelected+7][subRute[m]['index']+7]);
+            m++;
+            while(m<subRute.length){
+              if(min>Number(this.distance[idxSelected+7][subRute[m]['index']+7])){
+                min=Number(this.distance[idxSelected+7][subRute[m]['index']+7]);
+                selectedDesa=m;
+                idxSelected=subRute[m]['index'];
+              }
+              m++;
+            }
+           newSubrute.push(this.deepCopy(subRute[selectedDesa])); 
+           subRute.splice(selectedDesa,1);
+        }
+         newSubrute.push(this.deepCopy(subRute[0])); 
+      }
+     else{
+       newSubrute.push(this.deepCopy(subRute[0]));
+     }
+     
+        
+        }
+        if(newSubrute.length>0)
+     pol[i].push(this.deepCopy(newSubrute));
+     else
+     pol[i].push(this.deepCopy(population[i][j]));
+        
+    }
+  }
+  return resolve(pol);
+  });
+}
+
+evaluasiClark(){
 let evl :number[]=[];
-let i=0;
+
+  let i=0;
 let sumJarak=0;
-while(i<route.length){//loop sebanyak populasi
+while(i<this.populasi.length){//loop sebanyak populasi
   let j=0;
   let jarak_route=0;
-  while(j<route[i].length){//loop sebanyak sub route
+  while(j<this.populasi[i].length){//loop sebanyak sub route
     let k=0;
     let jarak_subroute=0;
-    jarak_subroute+=Number(this.distance[f_gudang[i][j]][route[i][j][k]["index"]+7]) //jarak depot-customer
+    jarak_subroute+=Number(this.distance[this.fromG[i][j]][this.populasi[i][j][k]["index"]+7]) //jarak depot-customer
     
     // console.log([route[i][j].length-1]);
     
     // console.log(route[i][j][route[i][j].length-1]["index"]+7);
     // console.log(f_gudang[i][j]);
-    jarak_subroute+=Number(this.distance[route[i][j][route[i][j].length-1]["index"]+7][f_gudang[i][j]]) //jarak customer-depot
-    while(k<route[i][j].length-1){//loop sebanyak desa dalam sub route
-      jarak_subroute+=Number(this.distance[route[i][j][k]["index"]+7][route[i][j][k+1]["index"]+7]) //jarak depot-customer
+    jarak_subroute+=Number(this.distance[this.populasi[i][j][this.populasi[i][j].length-1]["index"]+7][this.fromG[i][j]]) //jarak customer-depot
+    while(k<this.populasi[i][j].length-1){//loop sebanyak desa dalam sub route
+      jarak_subroute+=Number(this.distance[this.populasi[i][j][k]["index"]+7][this.populasi[i][j][k+1]["index"]+7]) //jarak depot-customer
       k++;
     }
     jarak_route+=jarak_subroute;
     j++;
   }
-  sumJarak+=jarak_route;
   evl[i]=jarak_route;
+  sumJarak+=jarak_route;
   i++;
 }
-evl[route.length]=sumJarak; //menyimpan total jarak seluruh ind di array terakhir
+evl[this.populasi.length]=sumJarak; 
 return evl;
 }
+
+// mengambil desa yang belum terpenuhi demand nya
+getUnassignCust(rastragrup: any[][]){
+  let list=[];
+  for(let i=0;i<rastragrup.length;i++){
+    if(rastragrup[i]['colli']>0){
+      list.push(rastragrup[i]['$key']);
+    }
+  }
+  return list;
+}
+
+
+//deep copy array
+deepCopy(obj) {
+ if(typeof obj === 'object') {
+  return Object.keys(obj)
+   .map(k => ({ [k]: this.deepCopy(obj[k]) }))
+   .reduce((a, c) => Object.assign(a, c), []);
+ } else if(Array.isArray(obj)) {
+  return obj.map(this.deepCopy)
+ }
+ return obj;
+}
+
 //menghitung fitness
 calculateFitness(totJarak: number[]):number[]{
   let i=0;
@@ -918,10 +1492,12 @@ calculateFitness(totJarak: number[]):number[]{
 }
 
 //selection
-selection(route:any[][][][], fitness:number[], f_gud:number[][]){
+selection(route:any[][][][], fitness:number[], f_gud:number[][], subcol: any[][], datFlag: any [][]){
 
   let offs:any[][][][]=[];
   let f_gudang:number[][]=[];
+  let infoCol :any[][]=[];
+  let infoDat : any[][]=[];
   let cumulative: number[]=[];
   let pcumulative: number[]=[];
   let i=0;
@@ -956,609 +1532,171 @@ selection(route:any[][][][], fitness:number[], f_gud:number[][]){
     choosed[k]=l;
     offs.push(route[l]);
     f_gudang.push(f_gud[l]);
+    infoCol.push(subcol[l]);
+    infoDat.push(datFlag[l]);
     k++;
   }
 
-  return [offs,choosed,f_gudang];
+  return [offs,choosed,f_gudang, infoCol, infoDat];
 
 }
+
 //crossover
-crossover(offspring:any[][][][],populasi:any[][][][],choosed:number[], from_gudang: number[][]){
 
-
-let newOffspring: any[][][][]=[];
-let newFGudang : number [][]=[];
-
-//memilih indv yang dapat kawin
-let i=0;
-while(i<offspring.length){
-    let rnd=Math.random();
-    let child :any[][][]=[];
-    let fgudang : number[]=[];
-    if(rnd<this.prob_cross){  //individu dilakukan crossover jika bil random<pc
-      //memilih pasangan 
-       var randomParent = Math.floor(Math.random() * offspring.length);
-       
-       let same=true;
+crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOffs: any[][], fgudangPar:any[][], subcollioffs : any[][], subcollipar: any [][], datOffs: any[][], datPar: any[][]){
+  let i=0;
+  while(i<offs.length){
+    var randomParent = Math.floor(Math.random() * offs.length);
+    let same=true;
        if(choosed[i]!=randomParent)
        same=false;
        while(same){
-         randomParent = Math.floor(Math.random() * offspring.length);
+         randomParent = Math.floor(Math.random() * offs.length);
          if(choosed[i]!=randomParent)
           same=false;
        }
-       let gdg=this.deepCopy(this.gudang); //data stok gudang
-       let ras=this.deepCopy(this.rastra);//load rastra data
-       //route based crossover
-      //  console.log(i+"_"+choosed[i]+"_"+randomParent);
-       let parent1=Math.floor(populasi[randomParent].length/3);
-      //  console.log("Par: "+parent1);
-       let idx=0;
-       let idxparent2=parent1+1;
-       let desalist :number[]=[];
-       let sumC=this.sum_colli;
-       let col_sub :number[]=[];
-       let isLast=false;
-       while(idx<offspring[i].length){
-         let colli_in_subroute=0;
-         if(idx<=parent1){
-           //copy sebagian kecil dari parent 1 : original route
-          child[idx]=populasi[i][idx]; //child
-          fgudang[idx]=from_gudang[i][idx];//from gudang
-          for(let c=0;c<populasi[i][idx].length;c++){ //update data desa yang telah masuk route
-            if(!desalist.includes(populasi[i][idx][c]["index"])){ //jika desa belum ada maka dimasukkan
-              desalist.push(populasi[i][idx][c]["index"]);
-            }
-             
-              //kurangi data rastra
-               ras[populasi[i][idx][c]["index"]].colli-=populasi[i][idx][c]["load"];
-               sumC-=populasi[i][idx][c]["load"];
-               colli_in_subroute+=populasi[i][idx][c]["load"];
-              
-          }
-          col_sub[idx]=colli_in_subroute;
-         }
-         else{
-           //copy sebagian lainnya dari parent 2 : offspring yang subroute nya tidak bertabrakan dengan parent 1
-           let idxChild=0;
-           let exist=false;
+       console.log(choosed[i]+"_"+randomParent);
 
-          while(idxChild<offspring[i][idx].length&&!exist){
-            if(desalist.includes(offspring[i][idx][idxChild]["index"])){ //jika desa  ada maka dimasukkan
-             exist=true;
-            }
-            idxChild++;
-          }
-          if(!exist){ //jika sub route tidak bertabrakan
-            child[idxparent2]=offspring[i][idx];
-            fgudang[idxparent2]=from_gudang[i][idx];//from gudang
-            if(idx==offspring[i].length-1)
-            isLast=true;
-            
-          for(let c=0;c<offspring[i][idx].length;c++){ //update data desa yang telah masuk route
-              desalist.push(offspring[i][idx][c]["index"]);
-              //kurangi data rastra 
-                ras[offspring[i][idx][c]["index"]].colli-=offspring[i][idx][c]["load"];
-                sumC-=offspring[i][idx][c]["load"];
-                colli_in_subroute+=offspring[i][idx][c]["load"];
-              
-            }
-
-            col_sub[idxparent2]=colli_in_subroute;
-            idxparent2++;
-            
-
-          }
-         }
-         
-         idx++;
-       }
-
-        //console.log(isLast);
-       //repairing route
-          //1. Repairing desa yang belum masuk dalam rute 
-          
-            //mencari desa yang belum terlayani
-          
-            let unassign: number[]=[];
-            for(let h=0;h<ras.length;h++){ 
-              if(ras[h].colli!=0){ //jika tidak terdapat dalam desalist
-                unassign.push(h); //maka dimasukkan kedalam array 
+       let randomRoute1 = Math.floor(Math.random() * offs[i].length);
+       let randomRoute2 = Math.floor(Math.random() * parent[randomParent].length);
+        console.log("Route: "+randomRoute1+"_"+randomRoute2);
+        console.log(offs[i][randomRoute1]);
+        console.log(parent[randomParent][randomRoute2]);
+        //menampung index desa untuk proses removing
+        let listRoute1=[];
+        for(let a=0; a<offs[i][randomRoute1].length;a++){
+          listRoute1.push(offs[i][randomRoute1][a]['index']);
+        }
+        let listRoute2=[];
+        for(let a=0; a<parent[randomParent][randomRoute2].length;a++){
+          listRoute2.push(parent[randomParent][randomRoute2][a]['index']);
+        }
+        console.log(listRoute1);
+        console.log(listRoute2);
+        //parent 1
+        let parent1=this.deepCopy(offs[i]);
+        let fgud1=this.deepCopy(fgudangOffs[i]);
+        let subpar1=this.deepCopy(subcollioffs[i]);
+        let datflag1=this.deepCopy(datOffs[i]);
+        //parent 2
+        let parent2=this.deepCopy(parent[randomParent]);
+        let fgud2=this.deepCopy(fgudangPar[randomParent]);
+        let subpar2=this.deepCopy(subcollipar[randomParent]);
+        let datflag2=this.deepCopy(datPar[randomParent]);
+        console.log(this.deepCopy(offs[i]));
+        console.log(this.deepCopy(subcollioffs[i]));
+        console.log(this.deepCopy(fgudangOffs[i]));
+        console.log(this.deepCopy(datOffs[i]));
+        //menghapus desa di parent 1
+        for(let a=0; a<parent1.length;a++){
+          if(fgud1[a]==fgud2[randomRoute2]){
+            let found=false;
+            let idxr=0;
+            while(idxr<parent1[a].length){
+              if(listRoute2.includes(parent1[a][idxr]['index'])){
+                console.log(idxr+"_"+parent1[a].length);
+                console.log(a);
+                console.log(parent1[a][idxr]);
+                subpar1[a]-=parent1[a][idxr]['load'];
+                
+                parent1[a].splice(idxr,1);
+                idxr--;
                 
               }
+
+              idxr++;
             }
-            
-            //mengecek  sub route terakhir apakah masih dapat ditambahi desa
-            if(isLast){
-            let sumcol=0;
-            let dating=false;
-            let sumDating=0;
-            
-            for(let m=0;m<child[child.length-1].length;m++){ 
-              sumcol+=child[child.length-1][m]["load"];
-              if(this.isDataranTinggi(child[child.length-1][m]["desa"],child[child.length-1][m]["kecamatan"])){
-                dating=true;
-              }
-              if(dating){
-                sumDating+=child[child.length-1][m]["load"];
-              }
-              
-              
-            }
-            let v_capacity=this.vCap;
-            let v_dating=this.vDating;
-            let countidx=child[child.length-1].length;
-            if(sumcol<v_capacity ){
-              v_capacity-=sumcol;
-              v_dating-=sumDating;
-              let colli_in_subroute=sumcol;
-             
-              
-              if(dating==true&&sumDating<v_dating){
-                //dapat ditambahi desa lagi dalam constrint dataran tinggi
-                
-                while(v_capacity>0 && v_dating>0 &&unassign.length>0){
-                  
-                   var rndN = Math.floor(Math.random() * unassign.length);
-                   let cc:any[]=[];
-                   child[child.length-1][countidx]=[];
-                //jika kapasitas truk >= kapasitas muatan dataran tinggi
-                if(v_capacity>=v_dating){
-                     //jika kapasitas muatan dataran tinggi > demand
-                    if(v_dating>=ras[unassign[rndN]].colli){
-                      //maka semua demand diantarkan
-                    cc["index"]=ras[unassign[rndN]].$key;
-                    cc["desa"]=ras[unassign[rndN]].desa;
-                    cc["kecamatan"]=ras[unassign[rndN]].kecamatan;
-                    cc["kab"]=ras[unassign[rndN]].kabupaten;
-                    cc["load"]=ras[unassign[rndN]].colli;
-                    child[child.length-1][countidx]=cc;
-                    v_capacity-=ras[unassign[rndN]].colli;
-                    v_dating-=ras[unassign[rndN]].colli;
-                    colli_in_subroute+=v_dating; 
-                    sumC-=ras[unassign[rndN]].colli;
-                    ras[unassign[rndN]].colli-=ras[unassign[rndN]].colli;
-                    unassign.splice(unassign.indexOf(unassign[rndN]),1);
-                  }
-                  //jika kapasitas muatan dataran tinggi < demand
-                  else{
-                    //maka sebagian demand diantarkan
-                    cc["index"]=ras[unassign[rndN]].$key;
-                    cc["desa"]=ras[unassign[rndN]].desa;
-                    cc["kecamatan"]=ras[unassign[rndN]].kecamatan;
-                    cc["kab"]=ras[unassign[rndN]].kabupaten;
-                    cc["load"]=v_dating;
-                    child[child.length-1][countidx]=cc;
-                    v_capacity-=v_dating;
-                    colli_in_subroute+=v_dating; 
-                    sumC-=v_dating; 
-                    ras[unassign[rndN]].colli-=v_dating;
-                    v_dating-=v_dating;
-                  }
+            if(parent1[a].length==0){
+                  parent1.splice(a,1);
                 }
-                //jika kapasitas truk < kapasitas muatan dataran tinggi
-                else{
-                  
-                  //jika kapasitas truk > demand
-                    if(v_capacity>=ras[unassign[rndN]].colli){
-                      //maka semua demand diantarkan
-                    cc["index"]=ras[unassign[rndN]].$key;
-                    cc["desa"]=ras[unassign[rndN]].desa;
-                    cc["kecamatan"]=ras[unassign[rndN]].kecamatan;
-                    cc["kab"]=ras[unassign[rndN]].kabupaten;
-                    cc["load"]=ras[unassign[rndN]].colli;
-                    child[child.length-1][countidx]=cc;
-                    v_capacity-=ras[unassign[rndN]].colli;
-                    v_dating-=ras[unassign[rndN]].colli;
-                    colli_in_subroute+=ras[unassign[rndN]].colli;
-                    sumC-=ras[unassign[rndN]].colli;
-                    ras[unassign[rndN]].colli-=ras[unassign[rndN]].colli;
-                    unassign.splice(unassign.indexOf(unassign[rndN]),1);
-                  }
-                  //jika kapasitas truk < demand
-                  else{
-                    //maka sebagian demand diantarkan
-                    cc["index"]=ras[unassign[rndN]].$key;
-                    cc["desa"]=ras[unassign[rndN]].desa;
-                    cc["kecamatan"]=ras[unassign[rndN]].kecamatan;
-                    cc["kab"]=ras[unassign[rndN]].kabupaten;
-                    cc["load"]=v_capacity;
-                    child[child.length-1][countidx]=cc;
-                    v_dating-=v_capacity;
-                    colli_in_subroute+=v_capacity;
-                    sumC-=v_capacity;
-                    ras[unassign[rndN]].colli-=v_capacity;
-                    v_capacity-=v_capacity;
-                  }
-
+            if(subpar1[a]==0){
+                  subpar1.splice(a,1);
+                  fgud1.splice(a,1);
+                  datflag1.splice(a,1);
                 }
-                countidx++;
-              
-              }//end while
-              col_sub[child.length-1]=colli_in_subroute;
-              }
-              else{
-                
-                //dapat ditambahi desa lagi tanpa constrint dataran tinggi
-                while(v_capacity>0 && v_dating>0 &&unassign.length>0){
-                  
-                  let cc:any[]=[];
-                   child[child.length-1][countidx]=[];
-                   var rndN = Math.floor(Math.random() * unassign.length);
-                //jika kapasitas truk > demand
-                    if(v_capacity>=ras[unassign[rndN]].colli){
-                      //maka semua demand diantarkan
-                    cc["index"]=ras[unassign[rndN]].$key;
-                    cc["desa"]=ras[unassign[rndN]].desa;
-                    cc["kecamatan"]=ras[unassign[rndN]].kecamatan;
-                    cc["kab"]=ras[unassign[rndN]].kabupaten;
-                    cc["load"]=ras[unassign[rndN]].colli;
-                    child[child.length-1][countidx]=cc;
-                    v_capacity-=ras[unassign[rndN]].colli;
-                    colli_in_subroute+=ras[unassign[rndN]].colli;
-                    sumC-=ras[unassign[rndN]].colli;
-                    ras[unassign[rndN]].colli-=ras[unassign[rndN]].colli;
-                    unassign.splice(unassign.indexOf(unassign[rndN]),1);
-                  }
-                  //jika kapasitas truk < demand
-                  else{
-                    //maka sebagian demand diantarkan
-                    cc["index"]=ras[unassign[rndN]].$key;
-                    cc["desa"]=ras[unassign[rndN]].desa;
-                    cc["kecamatan"]=ras[unassign[rndN]].kecamatan;
-                    cc["kab"]=ras[unassign[rndN]].kabupaten;
-                    cc["load"]=v_capacity;
-                    child[child.length-1][countidx]=cc;
-                    colli_in_subroute+=v_capacity;
-                     sumC-=v_capacity;
-                     ras[unassign[rndN]].colli-=v_capacity;
-                    v_capacity-=v_capacity;
-                   
-                  }
-                  countidx++;
-                }//end while
-                
-                col_sub[child.length-1]=colli_in_subroute;
-              }
-            }
           }
-          
-          //memasukkan desa yang belum terassign
-          let idxNewchild=child.length;
-         
-          while(sumC>0){ // loop hingga semua colli ->menghasilkan 1 solusi=route=beberapa sub route
-          let v_capacity=this.vCap; //kapasitas vehicle 8 ton =533 colli
-          let j=0; //index desa dalam sub route
-          let dating=false;
-          let v_dating=this.vDating;
-          let colli_in_subroute=0;
-          child[idxNewchild]=[];
-              while(v_capacity>0 && v_dating>0 && sumC>0){ //loop hingga kapasitas kendaraan -> menghasilkan 1 sub route
-                child[idxNewchild][j]=[];
+        }
+        console.log(parent1);
+        console.log(subpar1);
+        console.log(fgud1);
+        console.log(datflag1);
+        console.log('Parent 2')
+        console.log(this.deepCopy(parent[randomParent]));
+        console.log(this.deepCopy(subcollipar[randomParent]));
+        console.log(this.deepCopy(fgudangPar[randomParent]));
+        console.log(this.deepCopy(datPar[randomParent]));
+        //menghapus desa di parent 1
+        for(let a=0; a<parent2.length;a++){
+          if(fgud2[a]==fgudangOffs[i][randomRoute1]){
+            let found=false;
+            let idxr=0;
+            while(idxr<parent2[a].length){
+              if(listRoute1.includes(parent2[a][idxr]['index'])){
+                console.log(idxr+"_"+parent2[a].length);
+                console.log(a);
+                console.log(parent2[a][idxr]);
+                subpar2[a]-=parent2[a][idxr]['load'];
                 
-                    var rndN = Math.floor(Math.random() * unassign.length);
-                    
-                    //cek apakah desa merupakan dataran tinggi
-                      if(j==0){
-                        dating=this.isDataranTinggi(ras[unassign[rndN]].desa,ras[unassign[rndN]].kecamatan );
-                          
-                      }
-                      else{
-                        if(!dating){
-                          dating=this.isDataranTinggi(ras[unassign[rndN]].desa,ras[unassign[rndN]].kecamatan );
-                        }
-                      }
-                    
-                    
-                    //jika desa merupakan dataran tinggi
-                    if(dating){
-                      
-                        //jika kapasitas truk >= kapasitas muatan dataran tinggi
-                        if(v_capacity>=v_dating){
-                            //jika kapasitas muatan dataran tinggi > demand
-                            if(v_dating>=ras[unassign[rndN]].colli){
-                              //maka semua demand diantarkan
-                            child[idxNewchild][j]["index"]=ras[unassign[rndN]].$key;
-                            child[idxNewchild][j]["desa"]=ras[unassign[rndN]].desa;
-                            child[idxNewchild][j]["kecamatan"]=ras[unassign[rndN]].kecamatan;
-                            child[idxNewchild][j]["kab"]=ras[unassign[rndN]].kabupaten;
-                            child[idxNewchild][j]["load"]=ras[unassign[rndN]].colli;
-                            v_capacity-=ras[unassign[rndN]].colli;
-                            v_dating-=ras[unassign[rndN]].colli;
-                            colli_in_subroute+=ras[unassign[rndN]].colli;
-                            sumC-=ras[unassign[rndN]].colli;
-                            ras[unassign[rndN]].colli-=ras[unassign[rndN]].colli;
-                            unassign.splice(unassign.indexOf(unassign[rndN]),1);
-                          }
-                          //jika kapasitas muatan dataran tinggi < demand
-                          else{
-                            //maka sebagian demand diantarkan
-                            child[idxNewchild][j]["index"]=ras[unassign[rndN]].$key;
-                            child[idxNewchild][j]["desa"]=ras[unassign[rndN]].desa;
-                            child[idxNewchild][j]["kecamatan"]=ras[unassign[rndN]].kecamatan;
-                            child[idxNewchild][j]["kab"]=ras[unassign[rndN]].kabupaten;
-                            child[idxNewchild][j]["load"]=v_dating;
-                            ras[unassign[rndN]].colli-=v_dating;
-                            v_capacity-=v_dating;
-                            colli_in_subroute+=v_dating; 
-                            sumC-=v_dating; 
-                            v_dating-=v_dating;
-                          }
-                        }
-                        //jika kapasitas truk < kapasitas muatan dataran tinggi
-                        else{
-                          
-                          //jika kapasitas truk > demand
-                            if(v_capacity>=ras[unassign[rndN]].colli){
-                              //maka semua demand diantarkan
-                            child[idxNewchild][j]["index"]=ras[unassign[rndN]].$key;
-                            child[idxNewchild][j]["desa"]=ras[unassign[rndN]].desa;
-                            child[idxNewchild][j]["kecamatan"]=ras[unassign[rndN]].kecamatan;
-                            child[idxNewchild][j]["kab"]=ras[unassign[rndN]].kabupaten;
-                            child[idxNewchild][j]["load"]=ras[unassign[rndN]].colli;
-                            v_capacity-=ras[unassign[rndN]].colli;
-                            v_dating-=ras[unassign[rndN]].colli;
-                            colli_in_subroute+=ras[unassign[rndN]].colli;
-                            sumC-=ras[unassign[rndN]].colli;
-                            ras[unassign[rndN]].colli-=ras[unassign[rndN]].colli;
-                            unassign.splice(unassign.indexOf(unassign[rndN]),1);
-                          }
-                          //jika kapasitas truk < demand
-                          else{
-                            //maka sebagian demand diantarkan
-                            child[idxNewchild][j]["index"]=ras[unassign[rndN]].$key;
-                            child[idxNewchild][j]["desa"]=ras[unassign[rndN]].desa;
-                            child[idxNewchild][j]["kecamatan"]=ras[unassign[rndN]].kecamatan;
-                            child[idxNewchild][j]["kab"]=ras[unassign[rndN]].kabupaten;
-                            child[idxNewchild][j]["load"]=v_capacity;
-                            ras[unassign[rndN]].colli-=v_capacity;
-                            v_dating-=v_capacity;
-                            colli_in_subroute+=v_capacity;
-                            sumC-=v_capacity;
-                            v_capacity-=v_capacity;
-                          }
-
-                        }
-                    }
-                    //jika desa bukan dataran tinggi
-                    else{
-                      //jika kapasitas truk > demand
-                            if(v_capacity>=ras[unassign[rndN]].colli){
-                              //maka semua demand diantarkan
-                            child[idxNewchild][j]["index"]=ras[unassign[rndN]].$key;
-                            child[idxNewchild][j]["desa"]=ras[unassign[rndN]].desa;
-                            child[idxNewchild][j]["kecamatan"]=ras[unassign[rndN]].kecamatan;
-                            child[idxNewchild][j]["kab"]=ras[unassign[rndN]].kabupaten;
-                            child[idxNewchild][j]["load"]=ras[unassign[rndN]].colli;
-                            v_capacity-=ras[unassign[rndN]].colli;
-                            colli_in_subroute+=ras[unassign[rndN]].colli;
-                            sumC-=ras[unassign[rndN]].colli;
-                            ras[unassign[rndN]].colli-=ras[unassign[rndN]].colli;
-                            unassign.splice(unassign.indexOf(unassign[rndN]),1);
-                          }
-                          //jika kapasitas truk < demand
-                          else{
-                            //maka sebagian demand diantarkan
-                            child[idxNewchild][j]["index"]=ras[unassign[rndN]].$key;
-                            child[idxNewchild][j]["desa"]=ras[unassign[rndN]].desa;
-                            child[idxNewchild][j]["kecamatan"]=ras[unassign[rndN]].kecamatan;
-                            child[idxNewchild][j]["kab"]=ras[unassign[rndN]].kabupaten;
-                            child[idxNewchild][j]["load"]=v_capacity;
-                            ras[unassign[rndN]].colli-=v_capacity;
-                            colli_in_subroute+=v_capacity;
-                            sumC-=v_capacity;
-                            v_capacity-=v_capacity;
-                          
-                          }
-                    }
-                      
-                      j++;
-                    }
-                    col_sub[idxNewchild]=colli_in_subroute;
+                parent2[a].splice(idxr,1);
+                idxr--;
                 
-                    idxNewchild++;
+              }
 
-                  }//end while assig  unassign desa
-
-                //2. Memperbaiki gudang yang melayani desa
-               
-                  
-                  let j=0;
-                  let idxbeforeG=fgudang.length;
-                  let stop=false;
-                  let countStop=0;
-                  while(j<child.length&&!stop){   //loop sebanyak sub route dalam satu populasi
-                    if(gdg.length==0){
-                      break;
-                    }
-                    if(j<idxbeforeG){ //jika gudang telah terasiign cek apakah cukup
-                      let jml=Math.floor((gdg[fgudang[j]].stok*1000/15));
-                      if(col_sub[j]<=jml){ //jika cukup 
-                        gdg[fgudang[j]].stok-=col_sub[j]*15/1000;// maka kurangi stok gudang
-                        if(gdg[fgudang[j]].stok==0){
-                                  gdg.splice(fgudang[j],1);
-                                }
-                                j++;
-                      }
-                      else{//jika tidak cukup maka cari gudang lain scr random
-                          var randomNumber = Math.floor(Math.random() * gdg.length);
-                            let jml=Math.floor((gdg[randomNumber].stok*1000/15));
-                              if(col_sub[j]<=jml){
-                                fgudang[j]=randomNumber; //assign new random gudang
-                                gdg[randomNumber].stok-=col_sub[j]*15/1000;
-                                if(gdg[randomNumber].stok==0){
-                                  gdg.splice(randomNumber,1);
-                                }
-                                countStop=0;
-                                j++
-                              }
-                              //else jika stok tidak mencukupi maka random gudang lagi;
-                              else{
-                                
-                                if(countStop==10){ //jika sampai 10 kali tidak ditemukan
-                                  //console.log("No Random");
-                                  let x=0;
-                                  let ketemu=false;
-                                  while(x<gdg.length&&!ketemu){
-                                    jml=Math.floor((gdg[x]['stok']*1000/15));
-                                    if(col_sub[j]<=jml){
-                                    fgudang[j]=x;
-                                    gdg[x].stok-=col_sub[j]*15/1000;
-                                    if(gdg[x].stok==0){
-                                      gdg.splice(x,1);
-                                    }
-                                    countStop=0;
-                                    j++
-                                    ketemu=true;
-                                  }
-                                  x++;
-                                }
-                                //console.log(idx+"_"+ketemu);
-                                if(ketemu==false){
-                                  stop=true;
-                                  break;
-                                }
-                              }else{
-                                  countStop++;
-                                }
-                              }
-                      }
-                    }
-                    else{ //jika gudang belum ter assign 
-                      var randomNumber = Math.floor(Math.random() * gdg.length);
-                      let jml=Math.floor((gdg[randomNumber].stok*1000/15));
-                        if(col_sub[j]<=jml){
-                          fgudang[j]=randomNumber;
-                          gdg[randomNumber].stok-=col_sub[j]*15/1000;
-                          if(gdg[randomNumber].stok==0){
-                            gdg.splice(randomNumber,1);
-                          }
-                          countStop=0;
-                          j++
-                        }
-                        //else jika stok tidak mencukupi maka random gudang lagi;
-                        else{
-                          
-                          if(countStop==10){ //jika sampai 10 kali tidak ditemukan
-                            //console.log("No Random");
-                            let x=0;
-                            let ketemu=false;
-                            while(x<gdg.length&&!ketemu){
-                              jml=Math.floor((gdg[x]['stok']*1000/15));
-                              if(col_sub[j]<=jml){
-                              fgudang[j]=x;
-                              gdg[x].stok-=col_sub[j]*15/1000;
-                              if(gdg[x].stok==0){
-                                gdg.splice(x,1);
-                              }
-                              countStop=0;
-                              j++
-                              ketemu=true;
-                            }
-                            x++;
-                          }
-                          //console.log(idx+"_"+ketemu);
-                          if(ketemu==false){
-                            stop=true;
-                            break;
-                          }
-                            
-                          }else{
-                            countStop++;
-                          }
-                        }
-                    }
-                    
-
-                    
-                  }//end while
-                 
-                    
-          
+              idxr++;
+            }
+            if(parent2[a].length==0){
+                  parent2.splice(a,1);
+                }
+            if(subpar2[a]==0){
+                  subpar2.splice(a,1);
+                  fgud2.splice(a,1);
+                  datflag2.splice(a,1);
+                }
+          }
+        }
+        console.log(parent2);
+        console.log(subpar2);
+        console.log(fgud2);
+        console.log(datflag2);
+        //generate feasible flag insertion for every sub-route
+        let feaInsert1=[];
+        //parent 1
         
-
-       //assign child to newoffspring
-       newOffspring[i]=child;
-       //assign gudang yang melayani ke newFGudang
-       newFGudang[i]=fgudang;
-
-
-        if(stop==true){
-          console.log("unfeasible");
-          //jika child tidak feasible maka crossover ditolak
-          newOffspring[i]=offspring[i];
-          newFGudang[i]=from_gudang[i];
-          }
-    }
-    else{
-      newOffspring[i]=offspring[i];
-      newFGudang[i]=from_gudang[i];
-    }
-    i++;
-  
-}
-return [newOffspring,newFGudang];
-
-}
-
-//deep copy array
-deepCopy(obj) {
- if(typeof obj === 'object') {
-  return Object.keys(obj)
-   .map(k => ({ [k]: this.deepCopy(obj[k]) }))
-   .reduce((a, c) => Object.assign(a, c), []);
- } else if(Array.isArray(obj)) {
-  return obj.map(this.deepCopy)
- }
- return obj;
-}
-//mutation
-mutation(offspring : any[][][][]){
-  let i=0;
-  while(i<offspring.length){//loop sebanyak individu
-    let j=0;
-    while(j<offspring[i].length){
-      //generate random value : jika < pm maka dilakukan mutasi
-      let rnd = Math.random();
-      if(rnd<this.prob_mutation){ //dilakukan mutasi
-          if(offspring[i][j].length>2){
-            
-            let randomarray:number[]=[];
-            for(let k=0;k<offspring[i][j].length;k++){
-              randomarray.push(k);
+          for(let b=0; b<parent1.length;b++){
+            if(fgud1[b]==fgudangPar[randomParent][randomRoute2]){
+              if(subpar1[b]<this.vCap && !datflag1[b]){
+                  feaInsert1.push(b);
+              }
             }
-            let random1=Math.floor(Math.random() * randomarray.length);
-            random1=randomarray[random1];
-            randomarray.splice(random1,1);
-            let random2=Math.floor(Math.random() * randomarray.length);
-            random2=randomarray[random2];
-            //console.log(i+"_"+j+"_"+random1+"_"+random2);
-            let dat1=offspring[i][j][random1];
-            offspring[i][j][random1]=offspring[i][j][random2];
-            offspring[i][j][random2]=dat1;
           }
-          
-      }
-
-      j++;
-    }
+       
+        console.log(feaInsert1);
+        let feaInsert2=[];
+        //parent 2
+        
+          for(let b=0; b<parent2.length;b++){
+            if(fgud2[b]==fgudangOffs[i][randomRoute1]){
+              if(subpar2[b]<this.vCap && !datflag2[b]){
+                  feaInsert2.push(b);
+              }
+            }
+          }
+          console.log(feaInsert2);
+          //generate random number 0-1 untuk mementukan crossover dilakukan
+          var randNum = Math.random();
+          console.log(randNum);
+          if(randNum<this.prob_cross){
+            console.log('Crossover occur');
+            
+          }
+        
+        
 
     i++;
   }
-  return offspring;
-}
-// mereturn max value
-minVal(dist:number[]){
- let min=dist[0];
- let idx=0;
- for(let i=0; i<dist.length-1;i++){
-   if(dist[i]<min){
-    min=dist[i];
-    idx=i;
-   }
-   
- }
- return [min,idx];
+  
+  
+
 }
 
 

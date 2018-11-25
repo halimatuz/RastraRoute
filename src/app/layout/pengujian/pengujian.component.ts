@@ -87,7 +87,7 @@ constructor(
     private ujiService: UjiService,
     ){
         this.gen.getRoute2016();
-        this.gen2.GA(3,10,0.6,0.001);
+        this.gen2.GA(5,10,0.6,0.001);
         
         
     }
