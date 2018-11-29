@@ -79,6 +79,7 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
   this.info_dating=[];
   this.prob_cross=Pc;
   this.prob_mutation=Pm;
+  this.numIter=numberGen;
    this.InitializeDistance()
   .then(res =>{
     if(res){
@@ -138,18 +139,66 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
      if(res){
       this.populasi=this.deepCopy(res);
       console.log(this.deepCopy(this.populasi));
-     let jarak=this.evaluasiClark();
-     console.log(jarak);
+      let jarak=this.evaluasiClark(this.populasi,this.fromG);
+      console.log(jarak);
+      let a=this.minVal(this.deepCopy(jarak));
+      let elite=a[0];
+      let eliteidx=a[1];
+      let histElite: number []=[];
+      let idx=0;
+      let pop=this.deepCopy(this.populasi);
+      let fromGud=this.deepCopy(this.fromG);
+      let subCol=this.deepCopy(this.info_Col);
+      let datF=this.deepCopy(this.info_dating);
+      let individu:any[][][]=this.deepCopy(this.populasi[a[1]]);
+      while(idx<this.numIter){
+        console.log("iter : "+idx);
       let y=this.calculateFitness(this.deepCopy(jarak));
-      let sel=this.selection(this.deepCopy(this.populasi),this.deepCopy(y),this.deepCopy(this.fromG),this.deepCopy(this.info_Col), this.deepCopy(this.info_dating) );
+      let sel=this.selection(this.deepCopy(pop),this.deepCopy(y),this.deepCopy(fromGud),this.deepCopy(subCol), this.deepCopy(datF) );
       console.log(sel);
-      this.crossover(this.deepCopy(sel[0]), this.deepCopy(sel[1]), this.deepCopy(this.populasi),  this.deepCopy(sel[2]), this.deepCopy(this.fromG), this.deepCopy(sel[3]), this.deepCopy(this.info_Col), this.deepCopy(sel[4]), this.deepCopy(this.info_dating) );
+      let cross=this.crossover(this.deepCopy(sel[0]), this.deepCopy(sel[1]), this.deepCopy(pop),  this.deepCopy(sel[2]), this.deepCopy(fromGud), this.deepCopy(sel[3]), this.deepCopy(subCol), this.deepCopy(sel[4]), this.deepCopy(datF), this.deepCopy(this.rastra) );
+      console.log(cross);
+      
+      pop=this.deepCopy(cross[0]);
+      fromGud=this.deepCopy(cross[1]);
+      subCol=this.deepCopy(cross[2]);
+      datF=this.deepCopy(cross[3]);
+      jarak=this.evaluasiClark(pop,fromGud);
+      let val=this.minVal(this.deepCopy(jarak));
+      histElite[idx]=elite;
+      if(elite>val[0]){
+        elite=val[0];
+        eliteidx=val[1];
+        let ind=this.deepCopy(cross);
+        individu=ind[a[1]];
+        let gud=this.deepCopy(cross[1]);
+        
+      }
+      idx++;
+    }
+    console.log(histElite);
+    console.log(elite);
+      
+
      }
    return true;
     
     
   })
   });
+}
+// mereturn max value
+minVal(dist:number[]){
+ let min=dist[0];
+ let idx=0;
+ for(let i=0; i<dist.length-1;i++){
+   if(dist[i]<min){
+    min=dist[i];
+    idx=i;
+   }
+   
+ }
+ return [min,idx];
 }
 
 //mengambil data jarak json
@@ -1422,26 +1471,26 @@ scheduling(population : any[][][][], datFlag: any[][], fromgud: any[][]){
   });
 }
 
-evaluasiClark(){
+evaluasiClark(pop: any[][][], fgud: any[][]){
 let evl :number[]=[];
 
   let i=0;
 let sumJarak=0;
-while(i<this.populasi.length){//loop sebanyak populasi
+while(i<pop.length){//loop sebanyak populasi
   let j=0;
   let jarak_route=0;
-  while(j<this.populasi[i].length){//loop sebanyak sub route
+  while(j<pop[i].length){//loop sebanyak sub route
     let k=0;
     let jarak_subroute=0;
-    jarak_subroute+=Number(this.distance[this.fromG[i][j]][this.populasi[i][j][k]["index"]+7]) //jarak depot-customer
+    jarak_subroute+=Number(this.distance[fgud[i][j]][pop[i][j][k]["index"]+7]) //jarak depot-customer
     
     // console.log([route[i][j].length-1]);
     
     // console.log(route[i][j][route[i][j].length-1]["index"]+7);
     // console.log(f_gudang[i][j]);
-    jarak_subroute+=Number(this.distance[this.populasi[i][j][this.populasi[i][j].length-1]["index"]+7][this.fromG[i][j]]) //jarak customer-depot
-    while(k<this.populasi[i][j].length-1){//loop sebanyak desa dalam sub route
-      jarak_subroute+=Number(this.distance[this.populasi[i][j][k]["index"]+7][this.populasi[i][j][k+1]["index"]+7]) //jarak depot-customer
+    jarak_subroute+=Number(this.distance[pop[i][j][pop[i][j].length-1]["index"]+7][fgud[i][j]]) //jarak customer-depot
+    while(k<pop[i][j].length-1){//loop sebanyak desa dalam sub route
+      jarak_subroute+=Number(this.distance[pop[i][j][k]["index"]+7][pop[i][j][k+1]["index"]+7]) //jarak depot-customer
       k++;
     }
     jarak_route+=jarak_subroute;
@@ -1451,7 +1500,7 @@ while(i<this.populasi.length){//loop sebanyak populasi
   sumJarak+=jarak_route;
   i++;
 }
-evl[this.populasi.length]=sumJarak; 
+evl[pop.length]=sumJarak; 
 return evl;
 }
 
@@ -1543,8 +1592,12 @@ selection(route:any[][][][], fitness:number[], f_gud:number[][], subcol: any[][]
 
 //crossover
 
-crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOffs: any[][], fgudangPar:any[][], subcollioffs : any[][], subcollipar: any [][], datOffs: any[][], datPar: any[][]){
+crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOffs: any[][], fgudangPar:any[][], subcollioffs : any[][], subcollipar: any [][], datOffs: any[][], datPar: any[][], rastra:any[][]){
   let i=0;
+  let newOffs=[];
+  let newGud=[];
+  let newsub=[];
+  let newdatFlag=[];
   while(i<offs.length){
     var randomParent = Math.floor(Math.random() * offs.length);
     let same=true;
@@ -1555,13 +1608,13 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
          if(choosed[i]!=randomParent)
           same=false;
        }
-       console.log(choosed[i]+"_"+randomParent);
+      //  console.log(choosed[i]+"_"+randomParent);
 
        let randomRoute1 = Math.floor(Math.random() * offs[i].length);
        let randomRoute2 = Math.floor(Math.random() * parent[randomParent].length);
-        console.log("Route: "+randomRoute1+"_"+randomRoute2);
-        console.log(offs[i][randomRoute1]);
-        console.log(parent[randomParent][randomRoute2]);
+        // console.log("Route: "+randomRoute1+"_"+randomRoute2);
+        // console.log(offs[i][randomRoute1]);
+        // console.log(parent[randomParent][randomRoute2]);
         //menampung index desa untuk proses removing
         let listRoute1=[];
         for(let a=0; a<offs[i][randomRoute1].length;a++){
@@ -1571,8 +1624,8 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
         for(let a=0; a<parent[randomParent][randomRoute2].length;a++){
           listRoute2.push(parent[randomParent][randomRoute2][a]['index']);
         }
-        console.log(listRoute1);
-        console.log(listRoute2);
+        // console.log(listRoute1);
+        // console.log(listRoute2);
         //parent 1
         let parent1=this.deepCopy(offs[i]);
         let fgud1=this.deepCopy(fgudangOffs[i]);
@@ -1583,121 +1636,675 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
         let fgud2=this.deepCopy(fgudangPar[randomParent]);
         let subpar2=this.deepCopy(subcollipar[randomParent]);
         let datflag2=this.deepCopy(datPar[randomParent]);
-        console.log(this.deepCopy(offs[i]));
-        console.log(this.deepCopy(subcollioffs[i]));
-        console.log(this.deepCopy(fgudangOffs[i]));
-        console.log(this.deepCopy(datOffs[i]));
+
+        let orInd1=this.calDistance(this.deepCopy(offs[i]),this.deepCopy(fgudangOffs[i]));
+        let orInd2=this.calDistance(this.deepCopy(parent[randomParent]),this.deepCopy(fgudangPar[randomParent]));
+
+        var randNum = Math.random();
+          console.log(randNum);
+          if(randNum<this.prob_cross){
+        // console.log(this.deepCopy(offs[i]));
+        // console.log(this.deepCopy(subcollioffs[i]));
+        // console.log(this.deepCopy(fgudangOffs[i]));
+        // console.log(this.deepCopy(datOffs[i]));
+        // console.log(this.cekSum(subcollioffs[i]));
+        //generate random number 0-1 untuk mementukan crossover dilakukan child 1
+          
         //menghapus desa di parent 1
+        console.log('p1');
         for(let a=0; a<parent1.length;a++){
           if(fgud1[a]==fgud2[randomRoute2]){
             let found=false;
             let idxr=0;
+            // console.log(this.deepCopy(parent1[a]));
             while(idxr<parent1[a].length){
               if(listRoute2.includes(parent1[a][idxr]['index'])){
-                console.log(idxr+"_"+parent1[a].length);
-                console.log(a);
-                console.log(parent1[a][idxr]);
+                // console.log(idxr+"_"+parent1[a].length);
+                // console.log(a);
+                // console.log(parent1[a][idxr]);
                 subpar1[a]-=parent1[a][idxr]['load'];
                 
                 parent1[a].splice(idxr,1);
-                idxr--;
                 
+                
+              }else{
+                idxr++;
               }
-
-              idxr++;
             }
-            if(parent1[a].length==0){
-                  parent1.splice(a,1);
-                }
             if(subpar1[a]==0){
+                   parent1.splice(a,1);
                   subpar1.splice(a,1);
                   fgud1.splice(a,1);
                   datflag1.splice(a,1);
+                  a--;
                 }
+                
           }
         }
-        console.log(parent1);
-        console.log(subpar1);
-        console.log(fgud1);
-        console.log(datflag1);
-        console.log('Parent 2')
-        console.log(this.deepCopy(parent[randomParent]));
-        console.log(this.deepCopy(subcollipar[randomParent]));
-        console.log(this.deepCopy(fgudangPar[randomParent]));
-        console.log(this.deepCopy(datPar[randomParent]));
-        //menghapus desa di parent 1
+        // console.log(this.deepCopy(parent1));
+        // console.log(this.deepCopy(subpar1));
+        // console.log(this.deepCopy(fgud1));
+        // console.log(datflag1);
+        // console.log('Parent 2')
+        // console.log(this.deepCopy(parent[randomParent]));
+        // console.log(this.deepCopy(subcollipar[randomParent]));
+        // console.log(this.deepCopy(fgudangPar[randomParent]));
+        // console.log(this.deepCopy(datPar[randomParent]));
+        //menghapus desa di parent 2
+        // console.log('p2');
         for(let a=0; a<parent2.length;a++){
           if(fgud2[a]==fgudangOffs[i][randomRoute1]){
             let found=false;
             let idxr=0;
+            // console.log(this.deepCopy(parent2[a]));
             while(idxr<parent2[a].length){
               if(listRoute1.includes(parent2[a][idxr]['index'])){
-                console.log(idxr+"_"+parent2[a].length);
-                console.log(a);
-                console.log(parent2[a][idxr]);
+                // console.log(idxr+"_"+parent2[a].length);
+                // console.log(a);
+                // console.log(parent2[a][idxr]);
                 subpar2[a]-=parent2[a][idxr]['load'];
                 
                 parent2[a].splice(idxr,1);
-                idxr--;
                 
+                
+              }else{
+                idxr++;
               }
 
-              idxr++;
+              
             }
-            if(parent2[a].length==0){
-                  parent2.splice(a,1);
-                }
+            
             if(subpar2[a]==0){
+                parent2.splice(a,1);
                   subpar2.splice(a,1);
                   fgud2.splice(a,1);
                   datflag2.splice(a,1);
+                  a--;
                 }
+                
           }
         }
-        console.log(parent2);
-        console.log(subpar2);
-        console.log(fgud2);
-        console.log(datflag2);
-        //generate feasible flag insertion for every sub-route
-        let feaInsert1=[];
-        //parent 1
+        // console.log(parent2);
+        // console.log(subpar2);
+        // console.log(fgud2);
+        // console.log(datflag2);
         
-          for(let b=0; b<parent1.length;b++){
-            if(fgud1[b]==fgudangPar[randomParent][randomRoute2]){
-              if(subpar1[b]<this.vCap && !datflag1[b]){
-                  feaInsert1.push(b);
-              }
-            }
-          }
-       
-        console.log(feaInsert1);
-        let feaInsert2=[];
-        //parent 2
-        
-          for(let b=0; b<parent2.length;b++){
-            if(fgud2[b]==fgudangOffs[i][randomRoute1]){
-              if(subpar2[b]<this.vCap && !datflag2[b]){
-                  feaInsert2.push(b);
-              }
-            }
-          }
-          console.log(feaInsert2);
-          //generate random number 0-1 untuk mementukan crossover dilakukan
-          var randNum = Math.random();
-          console.log(randNum);
-          if(randNum<this.prob_cross){
-            console.log('Crossover occur');
-            
-          }
-        
-        
+          // console.log('c1');
+            //masukkan cust ke sub route
+            for(let a=0;a<listRoute2.length;a++){ //loop sebanyak cust
+              let sum=rastra[listRoute2[a]]['colli'];
+              if(!this.isDataranTinggi(rastra[listRoute2[a]]['desa'], rastra[listRoute2[a]]['kecamatan'])){
 
+              // console.log(sum);
+              //generate feasible flag insertion for every sub-route
+              let feaInsert1=[];
+                //parent 1
+                
+                  for(let b=0; b<parent1.length;b++){
+                    if(fgud1[b]==fgudangPar[randomParent][randomRoute2]){
+                      if(subpar1[b]<this.vCap && !datflag1[b]){
+                          feaInsert1.push(b);
+                      }
+                    }
+                  }
+              
+                // console.log(feaInsert1);
+              while(sum>0){ //loop sampai cust terassign semua colli nya
+                for(let b=0;b<feaInsert1.length;b++){ //loop sebanyak feasible insertion
+                  //check diaasign ke yang mana berdasarkan jarak terkecil
+                  let idx=this.checkLeastDist(listRoute2[a],this.deepCopy(parent1[feaInsert1[b]]),fgudangPar[randomParent][randomRoute2]);
+                  
+                  // console.log(feaInsert1[b]);
+                  // console.log(parent1[feaInsert1[b]]);
+                  let r=[];
+                   r["index"]=rastra[listRoute2[a]]['$key'];
+                   r["desa"]=rastra[listRoute2[a]]['desa'];
+                   r["kecamatan"]=rastra[listRoute2[a]]['kecamatan'];
+                   r["kab"]=rastra[listRoute2[a]]['kabupaten'];
+                   if(sum>0){
+                   if(this.vCap-subpar1[feaInsert1[b]]<=sum){
+                   r["load"]=this.vCap-subpar1[feaInsert1[b]];
+                   sum-=(this.vCap-subpar1[feaInsert1[b]]);
+                   parent1[feaInsert1[b]].splice(idx,0,r);
+                   subpar1[feaInsert1[b]]=this.vCap;
+                   feaInsert1.splice(b,1);
+                   b--;
+                   
+
+                  }
+                  else{
+                    r["load"]=sum;
+                    subpar1[feaInsert1[b]]+=sum;
+                    sum-=sum;
+                    parent1[feaInsert1[b]].splice(idx,0,r);
+                  }
+                  //  console.log(r);
+                   }
+                }//end for
+
+                let feaInsertDating1=[];
+                //parent 1
+
+                
+                  for(let b=0; b<parent1.length;b++){
+                    if(fgud1[b]==fgudangPar[randomParent][randomRoute2]){
+                      if(subpar1[b]<this.vCap && datflag1[b]){
+                          feaInsertDating1.push(b);
+                      }
+                    }
+                  }
+                  for(let b=0;b<feaInsertDating1.length;b++){ //loop sebanyak feasible insertion
+                  //check diaasign ke yang mana berdasarkan jarak terkecil
+                  let idx=0;
+                  
+                  // console.log(feaInsertDating1[b]);
+                  // console.log(parent1[feaInsertDating1[b]]);
+                  let r=[];
+                   r["index"]=rastra[listRoute2[a]]['$key'];
+                   r["desa"]=rastra[listRoute2[a]]['desa'];
+                   r["kecamatan"]=rastra[listRoute2[a]]['kecamatan'];
+                   r["kab"]=rastra[listRoute2[a]]['kabupaten'];
+                   if(sum>0){
+                   if(this.vCap-subpar1[feaInsertDating1[b]]<=sum){
+                   r["load"]=this.vCap-subpar1[feaInsertDating1[b]];
+                   sum-=(this.vCap-subpar1[feaInsertDating1[b]]);
+                   parent1[feaInsertDating1[b]].splice(idx,0,r);
+                   subpar1[feaInsertDating1[b]]=this.vCap;
+                   feaInsertDating1.splice(b,1);
+                   b--;
+                   
+
+                  }
+                  else{
+                    r["load"]=sum;
+                    subpar1[feaInsertDating1[b]]+=sum;
+                    sum-=sum;
+                    parent1[feaInsertDating1[b]].splice(idx,0,r);
+                  }
+                  //  console.log(r);
+                   }
+                }//end for
+
+
+                  if(sum>0){
+                    let r=[];
+                   r["index"]=rastra[listRoute2[a]]['$key'];
+                   r["desa"]=rastra[listRoute2[a]]['desa'];
+                   r["kecamatan"]=rastra[listRoute2[a]]['kecamatan'];
+                   r["kab"]=rastra[listRoute2[a]]['kabupaten'];
+                   if(this.vCap<=sum){
+                   r["load"]=this.vCap;
+                   sum-=this.vCap;
+                   parent1.push([]);
+                   parent1[parent1.length-1].push(r);
+                   subpar1.push(this.vCap);
+                   datflag1.push(false);
+                   fgud1.push(fgudangPar[randomParent][randomRoute2]);
+
+                  }
+                  else{
+                    r["load"]=sum;
+                    parent1.push([]);
+                   parent1[parent1.length-1].push(r);
+                    subpar1.push(sum);
+                    datflag1.push(false);
+                   fgud1.push(fgudangPar[randomParent][randomRoute2]);
+                   sum-=sum;
+                  }
+                  // console.log(r);
+                  
+                }            
+              }
+             
+            }
+            else{
+              console.log('dating1');
+               // console.log(sum);
+              let feaInsert1=[];
+                //parent 1
+                
+                  for(let b=0; b<parent1.length;b++){
+                    if(fgud1[b]==fgudangPar[randomParent][randomRoute2]){
+                      if(subpar1[b]<this.vCap && !datflag1[b]){
+                          feaInsert1.push(b);
+                      }
+                    }
+                  }
+              
+                // console.log(feaInsert1);
+              while(sum>0){ //loop sampai cust terassign semua colli nya
+                for(let b=0;b<feaInsert1.length;b++){ //loop sebanyak feasible insertion
+                  //check diaasign ke yang mana berdasarkan jarak terkecil
+                  let idx=parent1[feaInsert1[b]].length;
+                  
+                  // console.log(feaInsert1[b]);
+                  // console.log(parent1[feaInsert1[b]]);
+                  let r=[];
+                   r["index"]=rastra[listRoute2[a]]['$key'];
+                   r["desa"]=rastra[listRoute2[a]]['desa'];
+                   r["kecamatan"]=rastra[listRoute2[a]]['kecamatan'];
+                   r["kab"]=rastra[listRoute2[a]]['kabupaten'];
+                   if(sum>0){
+                   if(this.vCap-subpar1[feaInsert1[b]]<=sum){
+                     if(this.vCap-subpar1[feaInsert1[b]]<this.vDating){
+                      r["load"]=this.vCap-subpar1[feaInsert1[b]];
+                      sum-=(this.vCap-subpar1[feaInsert1[b]]);
+                      subpar1[feaInsert1[b]]+=this.vCap-subpar1[feaInsert1[b]];
+                     }
+                     else{
+                       r["load"]=this.vDating;
+                       sum-=(this.vDating);
+                       subpar1[feaInsert1[b]]+=this.vDating;
+                     }
+                   
+                   parent1[feaInsert1[b]].splice(idx,0,r);
+                   datflag1[feaInsert1[b]]=true;
+                   feaInsert1.splice(b,1);
+                   b--;
+                   
+
+                  }
+                  else{
+                    r["load"]=sum;
+                    subpar1[feaInsert1[b]]+=sum;
+                    sum-=sum;
+                    datflag1[feaInsert1[b]]=true;
+                    parent1[feaInsert1[b]].splice(idx,0,r);
+                  }
+                  //  console.log(r);
+                   }
+                  
+                  
+                   
+
+                }//end for
+                  if(sum>0){
+                    let r=[];
+                   r["index"]=rastra[listRoute2[a]]['$key'];
+                   r["desa"]=rastra[listRoute2[a]]['desa'];
+                   r["kecamatan"]=rastra[listRoute2[a]]['kecamatan'];
+                   r["kab"]=rastra[listRoute2[a]]['kabupaten'];
+                   if(this.vDating<=sum){
+                   r["load"]=this.vDating;
+                   sum-=this.vDating;
+                   parent1.push([]);
+                   parent1[parent1.length-1].push(r);
+                   subpar1.push(this.vDating);
+                   datflag1.push(true);
+                   fgud1.push(fgudangPar[randomParent][randomRoute2]);
+
+                  }
+                  else{
+                    r["load"]=sum;
+                    parent1.push([]);
+                   parent1[parent1.length-1].push(r);
+                    subpar1.push(sum);
+                    datflag1.push(true);
+                   fgud1.push(fgudangPar[randomParent][randomRoute2]);
+                   sum-=sum;
+                  }
+                  // console.log(r);
+                  
+                }            
+              }
+            }
+            }
+          
+        
+// console.log('c2');
+        //masukkan cust ke sub route for child 2
+            for(let a=0;a<listRoute1.length;a++){ //loop sebanyak cust
+              let sum=rastra[listRoute1[a]]['colli'];
+              if(!this.isDataranTinggi(rastra[listRoute1[a]]['desa'], rastra[listRoute1[a]]['kecamatan'])){
+
+              // console.log(sum);
+              //generate feasible flag insertion for every sub-route
+                
+                let feaInsert2=[];
+                //parent 2
+                
+                  for(let b=0; b<parent2.length;b++){
+                    if(fgud2[b]==fgudangOffs[i][randomRoute1]){
+                      if(subpar2[b]<this.vCap && !datflag2[b]){
+                          feaInsert2.push(b);
+                      }
+                    }
+                  }
+                  // console.log(feaInsert2);
+              while(sum>0){ //loop sampai cust terassign semua colli nya
+                for(let b=0;b<feaInsert2.length;b++){ //loop sebanyak feasible insertion
+                  //check diaasign ke yang mana berdasarkan jarak terkecil
+                  let idx=this.checkLeastDist(listRoute1[a],this.deepCopy(parent2[feaInsert2[b]]),fgudangPar[randomParent][randomRoute1]);
+                  
+                  // console.log(feaInsert1[b]);
+                  // console.log(parent1[feaInsert1[b]]);
+                  let r=[];
+                   r["index"]=rastra[listRoute1[a]]['$key'];
+                   r["desa"]=rastra[listRoute1[a]]['desa'];
+                   r["kecamatan"]=rastra[listRoute1[a]]['kecamatan'];
+                   r["kab"]=rastra[listRoute1[a]]['kabupaten'];
+                   if(sum>0){
+                   if(this.vCap-subpar2[feaInsert2[b]]<=sum){
+                   r["load"]=this.vCap-subpar2[feaInsert2[b]];
+                   sum-=(this.vCap-subpar2[feaInsert2[b]]);
+                   parent2[feaInsert2[b]].splice(idx,0,r);
+                   subpar2[feaInsert2[b]]=this.vCap;
+                   feaInsert2.splice(b,1);
+                   b--;
+                   
+
+                  }
+                  else{
+                    r["load"]=sum;
+                    subpar2[feaInsert2[b]]+=sum;
+                    sum-=sum;
+                    parent2[feaInsert2[b]].splice(idx,0,r);
+                  }
+                  //  console.log(r);
+                   }
+                  
+                  
+                   
+
+                }//end for
+
+              let feaInsertDating2=[];
+                //parent 1
+
+                
+                  for(let b=0; b<parent2.length;b++){
+                    if(fgud2[b]==fgudangOffs[i][randomRoute1]){
+                      if(subpar2[b]<this.vCap && datflag2[b]){
+                          feaInsertDating2.push(b);
+                      }
+                    }
+                  }
+                  
+                  // console.log(feaInsertDating2);
+                  // console.log(datflag2);
+                  // console.log(subpar2);
+                  for(let b=0;b<feaInsertDating2.length;b++){ //loop sebanyak feasible insertion
+                  //check diaasign ke yang mana berdasarkan jarak terkecil
+                  let idx=0;
+                  
+                  // console.log(feaInsertDating2[b]);
+                  // console.log(parent2[feaInsertDating2[b]]);
+                  let r=[];
+                   r["index"]=rastra[listRoute1[a]]['$key'];
+                   r["desa"]=rastra[listRoute1[a]]['desa'];
+                   r["kecamatan"]=rastra[listRoute1[a]]['kecamatan'];
+                   r["kab"]=rastra[listRoute1[a]]['kabupaten'];
+                   if(sum>0){
+                   if(this.vCap-subpar2[feaInsertDating2[b]]<=sum){
+                   r["load"]=this.vCap-subpar2[feaInsertDating2[b]];
+                   sum-=(this.vCap-subpar2[feaInsertDating2[b]]);
+                   parent2[feaInsertDating2[b]].splice(idx,0,r);
+                   subpar2[feaInsertDating2[b]]=this.vCap;
+                   feaInsertDating2.splice(b,1);
+                   b--;
+                   
+
+                  }
+                  else{
+                    r["load"]=sum;
+                    subpar2[feaInsertDating2[b]]+=sum;
+                    sum-=sum;
+                    parent2[feaInsertDating2[b]].splice(idx,0,r);
+                  }
+                  //  console.log(r);
+                   }
+                }//end for
+
+                  if(sum>0){
+                    let r=[];
+                   r["index"]=rastra[listRoute1[a]]['$key'];
+                   r["desa"]=rastra[listRoute1[a]]['desa'];
+                   r["kecamatan"]=rastra[listRoute1[a]]['kecamatan'];
+                   r["kab"]=rastra[listRoute1[a]]['kabupaten'];
+                   if(this.vCap<=sum){
+                   r["load"]=this.vCap;
+                   sum-=this.vCap;
+                   parent2.push([]);
+                   parent2[parent2.length-1].push(r);
+                   subpar2.push(this.vCap);
+                   datflag2.push(false);
+                   fgud2.push(fgudangPar[randomParent][randomRoute1]);
+
+                  }
+                  else{
+                    r["load"]=sum;
+                    parent2.push([]);
+                   parent2[parent2.length-1].push(r);
+                    subpar2.push(sum);
+                    datflag2.push(false);
+                   fgud2.push(fgudangPar[randomParent][randomRoute1]);
+                   sum-=sum;
+                  }
+                  // console.log(r);
+                  
+                }            
+              }
+             
+            }
+            else{
+              console.log('dating2');
+               // console.log(sum);
+              let feaInsert2=[];
+                //parent 2
+                
+                  for(let b=0; b<parent2.length;b++){
+                    if(fgud2[b]==fgudangOffs[i][randomRoute1]){
+                      if(subpar2[b]<this.vCap && !datflag2[b]){
+                          feaInsert2.push(b);
+                      }
+                    }
+                  }
+              
+                console.log(feaInsert2);
+              while(sum>0){ //loop sampai cust terassign semua colli nya
+                for(let b=0;b<feaInsert2.length;b++){ //loop sebanyak feasible insertion
+                  //check diaasign ke yang mana berdasarkan jarak terkecil
+                  let idx=parent1[feaInsert2[b]].length;
+                  
+                  // console.log(feaInsert1[b]);
+                  // console.log(parent1[feaInsert1[b]]);
+                  let r=[];
+                   r["index"]=rastra[listRoute1[a]]['$key'];
+                   r["desa"]=rastra[listRoute1[a]]['desa'];
+                   r["kecamatan"]=rastra[listRoute1[a]]['kecamatan'];
+                   r["kab"]=rastra[listRoute1[a]]['kabupaten'];
+                   if(sum>0){
+                   if(this.vCap-subpar2[feaInsert2[b]]<=sum){
+                     if(this.vCap-subpar2[feaInsert2[b]]<this.vDating){
+                      r["load"]=this.vCap-subpar2[feaInsert2[b]];
+                      sum-=(this.vCap-subpar2[feaInsert2[b]]);
+                      subpar2[feaInsert2[b]]+=this.vCap-subpar2[feaInsert2[b]];
+                     }
+                     else{
+                       r["load"]=this.vDating;
+                       sum-=(this.vDating);
+                       subpar2[feaInsert2[b]]+=this.vDating;
+                     }
+                   
+                   parent2[feaInsert2[b]].splice(idx,0,r);
+                   datflag2[feaInsert2[b]]=true;
+                   feaInsert2.splice(b,1);
+                   b--;
+                   
+
+                  }
+                  else{
+                    r["load"]=sum;
+                    subpar2[feaInsert2[b]]+=sum;
+                    sum-=sum;
+                    datflag2[feaInsert2[b]]=true;
+                    parent2[feaInsert2[b]].splice(idx,0,r);
+                  }
+                  //  console.log(r);
+                   }
+                  
+                  
+                   
+
+                }//end for
+                  if(sum>0){
+                    let r=[];
+                   r["index"]=rastra[listRoute1[a]]['$key'];
+                   r["desa"]=rastra[listRoute1[a]]['desa'];
+                   r["kecamatan"]=rastra[listRoute1[a]]['kecamatan'];
+                   r["kab"]=rastra[listRoute1[a]]['kabupaten'];
+                   if(this.vDating<=sum){
+                   r["load"]=this.vDating;
+                   sum-=this.vDating;
+                   parent2.push([]);
+                   parent2[parent2.length-1].push(r);
+                   subpar2.push(this.vDating);
+                   datflag2.push(true);
+                   fgud2.push(fgudangPar[randomParent][randomRoute1]);
+
+                  }
+                  else{
+                    r["load"]=sum;
+                    parent2.push([]);
+                   parent2[parent2.length-1].push(r);
+                    subpar2.push(sum);
+                    datflag2.push(true);
+                   fgud2.push(fgudangPar[randomParent][randomRoute1]);
+                   sum-=sum;
+                  }
+                  // console.log(r);
+                  
+                }            
+              }
+            }
+          }
+          let indv1=this.calDistance(this.deepCopy(parent1),this.deepCopy(fgud1));
+          let indv2=this.calDistance(this.deepCopy(parent2),this.deepCopy(fgud2));
+          // console.log(orInd1);
+          // console.log(orInd2);
+          // console.log(indv1);
+          // console.log(indv2);
+          if(indv1>orInd1 && indv2>orInd1 && orInd1<orInd2){
+            console.log('orpar1');
+            newOffs.push(this.deepCopy(offs[i]));
+            newGud.push(this.deepCopy(fgudangOffs[i]));
+            newsub.push(this.deepCopy(subcollioffs[i]));
+            newdatFlag.push(this.deepCopy(datOffs[i]));
+          }
+          else if(indv1>orInd2 && indv2>orInd2 && orInd1>orInd2){
+            console.log('orpar2');
+            newOffs.push(this.deepCopy(parent[randomParent]));
+            newGud.push(this.deepCopy(fgudangPar[randomParent]));
+            newsub.push(this.deepCopy(subcollipar[randomParent]));
+            newdatFlag.push(this.deepCopy(datPar[randomParent]));
+          }
+          else
+           if(indv1<indv2){
+            console.log('par1');
+            newOffs.push(this.deepCopy(parent1));
+            newGud.push(this.deepCopy(fgud1));
+            newsub.push(this.deepCopy(subpar1));
+            newdatFlag.push(this.deepCopy(datflag1));
+          }
+          else {
+            console.log('par2');
+            newOffs.push(this.deepCopy(parent2));
+            newGud.push(this.deepCopy(fgud2));
+            newsub.push(this.deepCopy(subpar2));
+            newdatFlag.push(this.deepCopy(datflag2));
+          }
+          
+          
+          }
+          else{
+            console.log('original');
+            newOffs.push(this.deepCopy(offs[i]));
+            newGud.push(this.deepCopy(fgudangOffs[i]));
+            newsub.push(this.deepCopy(subcollioffs[i]));
+            newdatFlag.push(this.deepCopy(datOffs[i]));
+          }
+          console.log(this.calDistance(this.deepCopy(newOffs[i]),this.deepCopy(newGud[i])));
+          console.log('tot_'+this.cekSum(newsub[i]));
     i++;
   }
+  console.log(newOffs);
+  console.log(newGud);
+  console.log(newsub);
+  console.log(newdatFlag);
+ return [newOffs, newGud, newsub, newdatFlag];
   
   
 
 }
+ checkLeastDist(cust:number, arrCust:any[][], gudf:number){
+    let subrute=[];
+    for(let a=0;a<arrCust.length;a++){
+      subrute.push(arrCust[a]['index']);
+    }
+    let list=this.deepCopy(subrute);
+    list.splice(0,0,cust);
+    let minJarak=0;
+    let selectedIdx=0;
+    //console.log(list[0]);
+    minJarak+=Number(this.distance[gudf][list[0]+7]) //jarak depot-customer
+    
+    minJarak+=Number(this.distance[list[list.length-1]+7][gudf]) //jarak customer-depot
+    let k=0;
+    while(k<list.length-1){//loop sebanyak desa dalam sub route
+      minJarak+=Number(this.distance[list[k]+7][list[k+1]+7]) //jarak customer-customer
+      k++;
+    }
+    for(let b=1;b<=arrCust.length+1;b++){
+      list=this.deepCopy(subrute);
+      list.splice(b,0,cust);
+      let jarak=0;
+        jarak+=Number(this.distance[gudf][list[0]+7]) //jarak depot-customer
+        
+        jarak+=Number(this.distance[list[list.length-1]+7][gudf]) //jarak customer-depot
+        let k=0;
+        while(k<list.length-1){//loop sebanyak desa dalam sub route
+          jarak+=Number(this.distance[list[k]+7][list[k+1]+7]) //jarak customer-customer
+          k++;
+        }
+        if(minJarak>jarak){
+          selectedIdx=k;
+          minJarak=jarak;
+        }
+    }
+    return selectedIdx;
+    
+  }
+  cekSum(ind: any[]){
+    let sum=0;
+    for(let i=0;i<ind.length;i++){
+      sum+=ind[i];
+    }
+    return sum;
+  }
+  calDistance(ind1: any[][][], fgud1: any[]){
+    let j=0;
+  let jarak_route=0;
+  while(j<ind1.length){//loop sebanyak sub route
+    let k=0;
+    let jarak_subroute=0;
+    jarak_subroute+=Number(this.distance[fgud1[j]][ind1[j][k]["index"]+7]) //jarak depot-customer
+    
+    // console.log([route[i][j].length-1]);
+    
+    // console.log(route[i][j][route[i][j].length-1]["index"]+7);
+    // console.log(f_gudang[i][j]);
+    jarak_subroute+=Number(this.distance[ind1[j][ind1[j].length-1]["index"]+7][fgud1[j]]) //jarak customer-depot
+    while(k<ind1[j].length-1){//loop sebanyak desa dalam sub route
+      jarak_subroute+=Number(this.distance[ind1[j][k]["index"]+7][ind1[j][k+1]["index"]+7]) //jarak depot-customer
+      k++;
+    }
+    jarak_route+=jarak_subroute;
+    j++;
+  }
+  return jarak_route;
+}
+mutation(){
 
+}
 
 }

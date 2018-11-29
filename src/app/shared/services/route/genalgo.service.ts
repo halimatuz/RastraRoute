@@ -131,9 +131,7 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
         individu=ind[a[1]];
         let gud=this.deepCopy(cross[1]);
         fgudang=gud[a[1]];
-
       }
-      
       console.log(elite);
       idx++;
        }
