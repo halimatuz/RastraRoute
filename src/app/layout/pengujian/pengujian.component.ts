@@ -77,7 +77,7 @@ export class PengujianComponent implements OnInit {
 
    //htmlToAdd="fg";
 
-   
+    populasi:any[][][][];
      ujiList: Uji[];
      hasil: any[]=[];
 constructor(
@@ -87,7 +87,7 @@ constructor(
     private ujiService: UjiService,
     ){
         this.gen.getRoute2016();
-        this.gen2.GA(10,2,0.8,0.001);
+        // this.gen2.GA(10,100,0.8,0.01);
         
         
     }
@@ -110,22 +110,26 @@ constructor(
 }
 calculate(){
     console.log(this.ujiList);
-    this.gen.GA(this.ujiList[0]['numPop'],this.ujiList[0]['numGen'],this.ujiList[0]['pc'],this.ujiList[0]['pm'])
+    this.gen2.GenInitialPop(20)
+    .then(res =>{
+                this.populasi=this.gen2.deepCopy(res);
+                return this.gen2.Loop(this.gen2.deepCopy(this.populasi),this.ujiList[0]['numGen'],this.ujiList[0]['pc'],this.ujiList[0]['pm']);
+      })
      .then(res =>{
             this.hasil.push(res);
-          return this.gen.GA(this.ujiList[1]['numPop'],this.ujiList[1]['numGen'],this.ujiList[1]['pc'],this.ujiList[1]['pm']);
+          return this.gen2.Loop(this.gen2.deepCopy(this.populasi),this.ujiList[1]['numGen'],this.ujiList[1]['pc'],this.ujiList[1]['pm']);
       })
       .then(res =>{
             this.hasil.push(res);
-          return this.gen.GA(this.ujiList[2]['numPop'],this.ujiList[2]['numGen'],this.ujiList[2]['pc'],this.ujiList[2]['pm']);
+          return this.gen2.Loop(this.gen2.deepCopy(this.populasi),this.ujiList[2]['numGen'],this.ujiList[2]['pc'],this.ujiList[2]['pm']);
       })
        .then(res =>{
             this.hasil.push(res);
-          return this.gen.GA(this.ujiList[3]['numPop'],this.ujiList[3]['numGen'],this.ujiList[3]['pc'],this.ujiList[3]['pm']);
+          return this.gen2.Loop(this.gen2.deepCopy(this.populasi),this.ujiList[3]['numGen'],this.ujiList[3]['pc'],this.ujiList[3]['pm']);
       })
       .then(res =>{
             this.hasil.push(res);
-          return this.gen.GA(this.ujiList[4]['numPop'],this.ujiList[4]['numGen'],this.ujiList[4]['pc'],this.ujiList[4]['pm']);
+          return this.gen2.Loop(this.gen2.deepCopy(this.populasi),this.ujiList[4]['numGen'],this.ujiList[4]['pc'],this.ujiList[4]['pm']);
       })
       .then(res =>{
           this.hasil.push(res);
