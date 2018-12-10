@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild  } from '@angular/core';
+
 import { routerTransition } from '../../router.animations';
 
 import { NgForm } from '@angular/forms';
@@ -9,6 +10,8 @@ import { Genalgov2Service } from '../../shared/services/route/genalgov2.service'
 import { UjiService } from '../../shared/services/uji/uji.service';
 import { Uji } from '../../shared/services/uji/uji.model';
 
+import { jqxLoaderComponent } from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxloader';
+
 
 
 @Component({
@@ -18,7 +21,7 @@ import { Uji } from '../../shared/services/uji/uji.model';
     animations: [routerTransition()]
 })
 export class PengujianComponent implements OnInit {
-
+@ViewChild('jqxLoader') jqxLoader: jqxLoaderComponent;
     // lineChart
     public lineChartData: Array<any>;
     public lineChartLabels: Array<any>;
@@ -80,13 +83,16 @@ export class PengujianComponent implements OnInit {
     populasi:any[][][][];
      ujiList: Uji[];
      hasil: any[]=[];
+     executionTime: any[]=[];
+     initTime=0;
 constructor(
     private tostr: ToastrService, 
     private gen : GenalgoService,
     private gen2 : Genalgov2Service,
     private ujiService: UjiService,
     ){
-        this.gen.getRoute2016();
+        //this.gen.getRoute2016();
+        this.gen.getRoute2017();
         // this.gen2.GA(10,100,0.8,0.01);
         
         
@@ -94,6 +100,7 @@ constructor(
    
     ngOnInit() {
       //read uji
+      
         var x = this.ujiService.getData();
         x.snapshotChanges().subscribe(item => {
       this.ujiList= [];
@@ -108,30 +115,52 @@ constructor(
    
     this.resetForm();
 }
+
 calculate(){
+    this.jqxLoader.open();
     console.log(this.ujiList);
-    this.gen2.GenInitialPop(20)
+    let before=performance.now();
+    let after=0;
+    this.gen2.GenInitialPop(5)
     .then(res =>{
+                after=performance.now();
+                this.initTime=after-before;
+                before=performance.now();
                 this.populasi=this.gen2.deepCopy(res);
                 return this.gen2.Loop(this.gen2.deepCopy(this.populasi),this.ujiList[0]['numGen'],this.ujiList[0]['pc'],this.ujiList[0]['pm']);
       })
      .then(res =>{
+         after=performance.now();
+         this.executionTime.push(after-before);
+          before=performance.now();
             this.hasil.push(res);
           return this.gen2.Loop(this.gen2.deepCopy(this.populasi),this.ujiList[1]['numGen'],this.ujiList[1]['pc'],this.ujiList[1]['pm']);
       })
       .then(res =>{
+          after=performance.now();
+                this.executionTime.push(after-before);
+                before=performance.now();
             this.hasil.push(res);
           return this.gen2.Loop(this.gen2.deepCopy(this.populasi),this.ujiList[2]['numGen'],this.ujiList[2]['pc'],this.ujiList[2]['pm']);
       })
        .then(res =>{
+           after=performance.now();
+                this.executionTime.push(after-before);
+                before=performance.now();
             this.hasil.push(res);
           return this.gen2.Loop(this.gen2.deepCopy(this.populasi),this.ujiList[3]['numGen'],this.ujiList[3]['pc'],this.ujiList[3]['pm']);
       })
       .then(res =>{
+          after=performance.now();
+                this.executionTime.push(after-before);
+                before=performance.now();
             this.hasil.push(res);
           return this.gen2.Loop(this.gen2.deepCopy(this.populasi),this.ujiList[4]['numGen'],this.ujiList[4]['pc'],this.ujiList[4]['pm']);
       })
       .then(res =>{
+          after=performance.now();
+                this.executionTime.push(after-before);
+                before=performance.now();
           this.hasil.push(res);
           let iter:number[]=[];
           for(let i=1;i<=res[0].length;i++){
@@ -145,6 +174,8 @@ calculate(){
            { data:  this.hasil[3][0] , label: 'Series 4' },
            { data:  this.hasil[4][0] , label: 'Series 5' }
     ];
+    this.jqxLoader.close();
+    // console.log(this.executionTime);
       });
 }
     onSubmit(ujiForm: NgForm) {

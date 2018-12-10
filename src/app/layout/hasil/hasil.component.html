@@ -5,10 +5,10 @@
     <app-page-header [heading]="'Hasil Rute'" [icon]="'fa-table'"> </app-page-header>
 
      <div class="card mb-3 table-responsive" >
-         <jqxLoader #jqxLoader
-                            [text]="''"
-                            [width]="60"
-                            [height]="60">
+          <jqxLoader #jqxLoader
+                            [text]="'Please wait for about 2 minutes...'"
+                            [width]="300"
+                            [height]="70">
                     </jqxLoader>
          <div class="row" style="padding:10px">
         <div class="col-sm-7" >
@@ -34,7 +34,7 @@
                     <button type="button" class="btn btn-secondary " (click)="calculate()" >Calculate
                         
                     </button>
-                    <button style="width:100%;font-size: 100%" type="button" class="btn btn-secondary" (click)="excelExport()">Download</button>     
+                    <button  type="button" class="btn btn-secondary" (click)="excelExport()">Download</button>     
                     
                 </div>
                 

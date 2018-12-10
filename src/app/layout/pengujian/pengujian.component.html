@@ -3,7 +3,11 @@
 <div [@routerTransition]>
     
     <app-page-header [heading]="'Pengujian'" [icon]="'fa-table'"> </app-page-header>
-    
+    <jqxLoader #jqxLoader
+                            [text]="'Please wait for about 2 minutes...'"
+                            [width]="300"
+                            [height]="70">
+                    </jqxLoader>
 
      
        
@@ -89,13 +93,38 @@
                 
             <div class="card mb-3">
                 <div class="card-header">
-                    Line Chart : {{gen.jarak2016}}
+                    Line Chart : {{gen.jarak2016}} | {{gen.jarak2017}}
                 </div>
                 <div class="card-body" *ngIf="lineChartData" >
                     <canvas baseChart height="130" [datasets]="lineChartData" [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="lineChartColors" [legend]="lineChartLegend" [chartType]="lineChartType" ></canvas>
                    
                 </div>
             </div>
+             <div class="card mb-3" >
+         <div class="card-body table-responsive">
+            <div class="card-header" style="background-color: white;border-bottom-color: white">
+                    <h5>Waktu Eksekusi yang dibutuhkan</h5>
+                </div>
+                    <table class="table table-striped" style="size: 100%;padding:10px" >
+                        <thead>
+                            <tr>
+                            <th scope="col">Pengujian ke</th>
+                            <th scope="col">Waktu (milisecond)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of executionTime; index as i">
+                            <th  scope="row">{{ i+1}}</th>
+                            <td>{{initTime+item}}</td>
+                            
+                            </tr>
+                            <tr>
+                            
+                        </tbody>
+                        </table>
+         </div>
+                </div>
+
 
 
     

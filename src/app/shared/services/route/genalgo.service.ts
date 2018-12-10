@@ -14,6 +14,9 @@ import { DataranTinggi } from '../dataran-tinggi/dataran-tinggi.model';
 import { Route2016Service } from '../route2016/route2016.service';
 import { Route2016 } from '../route2016/route2016.model';
 
+import { Route2017Service } from '../route2017/route2017.service';
+import { Route2017 } from '../route2017/route2017.model';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -31,6 +34,7 @@ export class GenalgoService {
   numIter :number;
   group_rastra : any[][];
   jarak2016: number=0;
+  jarak2017:number=0;
   vCap: number=533;
   vDating: number =400;
 
@@ -39,7 +43,8 @@ export class GenalgoService {
     private rastraService: RastraService,
     private gudangService: GudangService,
     private dataranTinggiService: DataranTinggiService,
-    private route2016Service : Route2016Service
+    private route2016Service : Route2016Service,
+    private route2017Service : Route2017Service,
     ) { 
   //this.GA(50,100,0.6,0.001);
  
@@ -1310,6 +1315,67 @@ getRoute2016(){
   });
   
 }
+getRoute2017(){
+   this.InitializeRastra()
+  .then(res =>{
+    if(res){
+            //console.log(this.distance);
+      return this.InitializeDistance();
+    }
+  }).then(res =>{
+    if(res){
+      let r2017:Route2017[];
+   var a = this.route2017Service.getData();
+   console.log(a);
+     a.snapshotChanges().subscribe(item => {
+      
+       r2017=[]
+      item.forEach(element => {
+        var b = element.payload.toJSON();
+        r2017.push(b as Route2017);
+       
+      });
+      let subroute:any[]=[];
+      let fgudang : number[]=[];
+        let i=0;
+        let idxsubRoute=1;
+        subroute[0]=[];
+        r2017[i].index=this.getIndex(r2017[i].kecamatan, r2017[i].desa);
+        subroute[idxsubRoute-1].push(r2017[i]);
+        fgudang.push(r2017[i].fgudang);
+        let same= true;
+       
+          while(i<r2017.length-1){
+             if(r2017[i+1]['subRoute']==idxsubRoute){
+                same=true;
+                r2017[i+1].index=this.getIndex(r2017[i+1].kecamatan, r2017[i+1].desa);
+                subroute[idxsubRoute-1].push(r2017[i+1]);
+              }else{
+                same=false;
+                r2017[i].index=this.getIndex(r2017[i].kecamatan, r2017[i].desa);
+                fgudang.push(r2017[i].fgudang);
+                subroute[idxsubRoute]=[];
+                r2017[i+1].index=this.getIndex(r2017[i+1].kecamatan, r2017[i+1].desa);
+                subroute[idxsubRoute].push(r2017[i+1]);
+                idxsubRoute++;
+
+              }
+           
+             i++;
+            }
+        // console.log(this.rastra);
+        // console.log(r2017);
+        // console.log(fgudang)
+        // console.log(subroute);
+        let ev=this.evaluasiPopulasi_route(subroute,fgudang);
+        console.log(ev);
+        this.jarak2017=ev;
+
+    });
+    }
+  });
+  
+}
 evaluasiPopulasi_route(route: any[][][], f_gudang:number[]):number{
 
   let j=0;
@@ -1336,6 +1402,7 @@ getIndex(kec : string, desa : string){
  let i=0;
  let idx=-1;
  while(!found&&i<this.rastra.length){
+ 
   if(this.rastra[i].kecamatan==kec&& this.rastra[i].desa==desa){
     found=true;
     idx=Number(this.rastra[i].$key);
@@ -1343,7 +1410,8 @@ getIndex(kec : string, desa : string){
   i++;
  }
  if(!found){
-   console.log('not found'+idx);
+   
+  console.log('not found'+idx);
  }
  return idx;
 }

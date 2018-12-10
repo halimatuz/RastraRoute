@@ -12,9 +12,12 @@ const routes: Routes = [
             { path: 'dashboard', loadChildren: './dashboard/dashboard.module#DashboardModule'},
             { path: 'data', loadChildren: './data/data.module#DataModule' },
             { path: 'hasil', loadChildren: './hasil/hasil.module#HasilModule' },
+            { path: 'download', loadChildren: './download/download.module#DownloadModule' },
             { path: 'pengaturan', loadChildren: './pengaturan/pengaturan.module#PengaturanModule' },
             { path: 'pengujian', loadChildren: './pengujian/pengujian.module#PengujianModule' },
-            { path: 'setting', loadChildren: './setting/setting.module#SettingModule', resolve: { data: UserResolver} },
+            { path: 'setting', loadChildren: './setting/setting.module#SettingModule', resolve: { data: UserResolver},
+            
+         },
          
             
         ]

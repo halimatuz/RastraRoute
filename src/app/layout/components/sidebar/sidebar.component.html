@@ -12,9 +12,13 @@
         <a [routerLink]="['/pengaturan']" [routerLinkActive]="['router-link-active']" class="list-group-item">
             <i class="fa fa-fw fa-gear"></i>&nbsp;{{ 'Pengaturan' }}
         </a>
+        <a [routerLink]="['/download']" [routerLinkActive]="['router-link-active']" class="list-group-item">
+            <i class="fa fa-fw fa-download"></i>&nbsp;{{ 'Download' }}
+        </a>
         <a *ngIf="user.email=='h52zzuhriyah@gmail.com'" [routerLink]="['/pengujian']" [routerLinkActive]="['router-link-active']" class="list-group-item">
             <i class="fa fa-fw fa-th"></i>&nbsp;{{ 'Pengujian' }}
         </a>
+        
        
         
         
