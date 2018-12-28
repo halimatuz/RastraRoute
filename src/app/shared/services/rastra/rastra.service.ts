@@ -26,7 +26,8 @@ export class RastraService {
       kabupaten: rastra.kabupaten,
       kecamatan: rastra.kecamatan,
       desa: rastra.desa,
-      colli: rastra.colli
+      colli: rastra.colli,
+     idx:rastra.idx,
     });
   }
   removeData(){

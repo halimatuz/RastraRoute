@@ -9,7 +9,7 @@ import { Gudang } from '../../shared/services/gudang/gudang.model';
 
 import { RouteService } from '../../shared/services/route/route.service';
 import { Route } from '../../shared/services/route/route.model';
-
+import { Genalgov2Service } from '../../shared/services/route/genalgov2.service';
 
 @Component({
     selector: 'app-hasil',
@@ -39,7 +39,8 @@ export class HasilComponent implements OnInit {
     constructor(
     private gen : GenalgoService,
     private gudangService: GudangService, 
-    private routeService: RouteService
+    private routeService: RouteService,
+    private gen2 : Genalgov2Service,
     ){
     }
     ngOnInit() {
@@ -109,7 +110,7 @@ export class HasilComponent implements OnInit {
     }
     calculate(){
        this.jqxLoader.open();
-        this.gen.GA(50,3,0.6,0.001)
+        this.gen2.GA(50,100,0.6,0.01)
         .then(res =>{
             console.log(res);
             this.routeService.removeData();

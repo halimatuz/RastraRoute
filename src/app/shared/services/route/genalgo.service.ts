@@ -192,13 +192,13 @@ InitializeRastra(){
       
       item.forEach(element => {
         var y = element.payload.toJSON();
-        if(y["colli"]!=0){
+        
         this.sum_colli+=y["colli"];
         y["$key"]=i;
         this.rastra.push(y as Rastra);
         
         i++;
-        }
+        
       });
       return resolve(true);
         });
@@ -1266,6 +1266,7 @@ getRoute2016(){
       let r2016:Route2016[];
    var a = this.route2016Service.getData();
    console.log(a);
+  //  console.log(this.rastra);
      a.snapshotChanges().subscribe(item => {
       
        r2016=[]
@@ -1402,7 +1403,7 @@ getIndex(kec : string, desa : string){
  let i=0;
  let idx=-1;
  while(!found&&i<this.rastra.length){
- 
+
   if(this.rastra[i].kecamatan==kec&& this.rastra[i].desa==desa){
     found=true;
     idx=Number(this.rastra[i].$key);
@@ -1410,7 +1411,6 @@ getIndex(kec : string, desa : string){
   i++;
  }
  if(!found){
-   
   console.log('not found'+idx);
  }
  return idx;

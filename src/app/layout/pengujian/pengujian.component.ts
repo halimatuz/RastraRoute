@@ -84,6 +84,7 @@ export class PengujianComponent implements OnInit {
      ujiList: Uji[];
      hasil: any[]=[];
      executionTime: any[]=[];
+     Elite: any[]=[];
      initTime=0;
 constructor(
     private tostr: ToastrService, 
@@ -91,7 +92,7 @@ constructor(
     private gen2 : Genalgov2Service,
     private ujiService: UjiService,
     ){
-        //this.gen.getRoute2016();
+        this.gen.getRoute2016();
         this.gen.getRoute2017();
         // this.gen2.GA(10,100,0.8,0.01);
         
@@ -121,7 +122,7 @@ calculate(){
     console.log(this.ujiList);
     let before=performance.now();
     let after=0;
-    this.gen2.GenInitialPop(5)
+    this.gen2.GenInitialPop(50)
     .then(res =>{
                 after=performance.now();
                 this.initTime=after-before;
@@ -166,6 +167,10 @@ calculate(){
           for(let i=1;i<=res[0].length;i++){
             iter.push(i);
           }
+          for(let a=0;a<this.hasil.length;a++){
+            this.Elite.push(this.hasil[a][0].slice(-1).pop())
+          }
+        //   console.log(this.Elite);
           this.lineChartLabels=iter;
         this.lineChartData=[
         { data:  this.hasil[0][0] , label: 'Series 1' },

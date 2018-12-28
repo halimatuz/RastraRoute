@@ -4,7 +4,7 @@
     
     <app-page-header [heading]="'Pengujian'" [icon]="'fa-table'"> </app-page-header>
     <jqxLoader #jqxLoader
-                            [text]="'Please wait for about 2 minutes...'"
+                            [text]="'Please wait for about several minutes...'"
                             [width]="300"
                             [height]="70">
                     </jqxLoader>
@@ -110,13 +110,14 @@
                             <tr>
                             <th scope="col">Pengujian ke</th>
                             <th scope="col">Waktu (milisecond)</th>
+                            <th scope="col">Total Jarak (Km)</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let item of executionTime; index as i">
+                            <tr *ngFor="let item of executionTime; index as i; ">
                             <th  scope="row">{{ i+1}}</th>
                             <td>{{initTime+item}}</td>
-                            
+                            <td>{{Elite[i]}}</td>
                             </tr>
                             <tr>
                             

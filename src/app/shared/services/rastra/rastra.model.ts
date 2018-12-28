@@ -4,4 +4,5 @@ export class Rastra {
     kecamatan : string;
     desa : string;
     colli : number;
+    idx: number;
 }

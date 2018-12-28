@@ -91,7 +91,7 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
   .then(res =>{
     if(res){
       
-      //console.log(this.rastra);
+      // console.log(this.rastra);
       
       //console.log(this.sum_colli);
       return this.InitializeGudang();
@@ -99,8 +99,8 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
   })
   .then(res =>{
      if(res)
-    console.log(this.gudang.length);
-    console.log(this.gudang);
+    // console.log(this.gudang.length);
+    // console.log(this.gudang);
    
     
     
@@ -117,11 +117,14 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
      if(!res){
       this.AssignSingleCust();
     // console.log(this.deepCopy(this.rastraGroup));
+    // console.log(this.deepCopy(this.RouteGroup));
     this.matrixSavings(this.deepCopy(this.rastraGroup),this.deepCopy(this.distance));
     let i=0;
     while(i<numberPop){
       console.log(i);
+      
       let x=this.Routing(i);
+      // console.log(x);
       this.populasi.push(x[0]);
       this.fromG.push(x[1]);
       this.info_Col.push(x[2]);
@@ -129,7 +132,8 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
       
       i++;
     }
-      
+      // let jarak=this.evaluasiClark(this.populasi,this.fromG);
+      // console.log(jarak);
     return this.scheduling(this.deepCopy(this.populasi),this.deepCopy(this.info_dating), this.deepCopy(this.fromG));
      }
      else{
@@ -140,6 +144,7 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
      if(res){
       this.populasi=this.deepCopy(res);
       // console.log(this.deepCopy(this.populasi));
+      // console.log(this.deepCopy(this.info_Col));
       let jarak=this.evaluasiClark(this.populasi,this.fromG);
       // console.log(jarak);
       let a=this.minVal(this.deepCopy(jarak));
@@ -152,8 +157,8 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
       let subCol=this.deepCopy(this.info_Col);
       let datF=this.deepCopy(this.info_dating);
       let individu:any[][][]=this.deepCopy(this.populasi[a[1]]);
-      let fgudang : number[]=this.deepCopy(res[a[1]]);
-      
+      let fgudang : number[]=this.deepCopy(this.fromG[a[1]]);
+     
       while(idx<this.numIter){
         console.log("iter : "+idx);
       let y=this.calculateFitness(this.deepCopy(jarak));
@@ -162,7 +167,7 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
       let cross=this.crossover(this.deepCopy(sel[0]), this.deepCopy(sel[1]), this.deepCopy(pop),  this.deepCopy(sel[2]), this.deepCopy(fromGud), this.deepCopy(sel[3]), this.deepCopy(subCol), this.deepCopy(sel[4]), this.deepCopy(datF), this.deepCopy(this.rastra) );
       // console.log(cross);
       let mut=this.mutation(this.deepCopy(cross[0]),this.deepCopy(cross[1]),this.deepCopy(cross[2]),this.deepCopy(cross[3]));
-      
+      // console.log(mut);
       pop=this.deepCopy(mut[0]);
       fromGud=this.deepCopy(mut[1]);
       subCol=this.deepCopy(mut[2]);
@@ -173,16 +178,20 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
       if(elite>val[0]){
         elite=val[0];
         eliteidx=val[1];
-        let ind=this.deepCopy(mut);
-        individu=ind[a[1]];
+        let ind=this.deepCopy(mut[0]);
+        individu=ind[eliteidx];
         let gud=this.deepCopy(mut[1]);
-        fgudang=gud[a[1]];
+        fgudang=gud[eliteidx];
+        // console.log('fgud: '+idx);
+        // console.log(gud[eliteidx]);
         
       }
       idx++;
     }
     console.log(histElite);
     console.log(elite);
+    console.log(fgudang);
+    console.log(individu);
       
      return resolve([histElite,individu, fgudang]);
      }
@@ -293,7 +302,7 @@ Loop(po_p:any[][][][], numberGen: number, Pc:number, Pm: number){
       let subCol=this.deepCopy(this.info_Col);
       let datF=this.deepCopy(this.info_dating);
       let individu:any[][][]=this.deepCopy(this.populasi[a[1]]);
-      let fgudang : number[]=this.deepCopy(po_p[a[1]]);
+      let fgudang : number[]=this.deepCopy(this.fromG[a[1]]);
       
       while(idx<this.numIter){
         console.log("iter : "+idx);
@@ -371,15 +380,17 @@ return new Promise((resolve,reject) =>{
 //grouping cust berdasarakan jarak terdekat ke depot
 groupingCust(ras : Rastra[]){
   return new Promise((resolve,reject) =>{
+    //init matriks jarak dan udang
   let dist=this.deepCopy(this.distance);
   let gdg = this.deepCopy(this.gudang);
   let i=0;
   let notfound =false;
   let sum=0;
-
+  //loop sebanyak desa
   while( i<ras.length&&!notfound){
+    if(ras[i]['colli']!=0){
      let assign =false;
-    let x=dist[i+7].slice(0,7);
+    let x=dist[ras[i].$key+7].slice(0,7);
     let xc=this.deepCopy(x);
     let val = this.deepCopy(x);
     val=val.sort((a,b)=>a-b);
@@ -412,6 +423,10 @@ groupingCust(ras : Rastra[]){
 if(!assign){
 notfound=true;
 }
+    }
+    else{
+      i++;
+    }
   
     
 }
@@ -493,7 +508,7 @@ matrixSavings(rasgroup : any[][][], dist: any[][]){
      
      for(let k=0; k<j;k++){
 let saving=Number(dist[rasgroup[i][j]['$key']+7][i])+Number(dist[rasgroup[i][k]['$key']+7][i])-Number(dist[rasgroup[i][j]['$key']+7][rasgroup[i][k]['$key']+7]);
-      
+     
       x[i][j].push(saving);
       list[i].push(saving);
       let b=[];
@@ -543,13 +558,13 @@ InitializeRastra(){
       
       item.forEach(element => {
         var y = element.payload.toJSON();
-        if(y["colli"]!=0){
+        
         this.sum_colli+=y["colli"];
-        y["$key"]=i;
+        y["$key"]=y['idx'];
         this.rastra.push(y as Rastra);
         
         i++;
-        }
+        
       });
       return resolve(true);
         });
@@ -636,6 +651,7 @@ Routing(kidx: number){
    //jika colli lebih besar dari vcap maka diassign dalm saru rute
 let gidx=0;
 let ruteGrup=this.deepCopy(this.RouteGroup);
+// console.log(this.deepCopy(this.RouteGroup));
 let subColli=this.deepCopy(this.subCol);
 let dating_flag_or=this.deepCopy(this.Dating_Flag);
 let kromosom=[];
@@ -756,7 +772,7 @@ while(gidx<this.RouteGroup.length){
                     r["kab"]=rasgrup[c].kabupaten;
                     r["load"]=this.vDating;
                     rasgrup[this.findIdx(gidx,bridge[0])].colli=rasgrup[c].colli-this.vDating;
-                    vdat[i]=this.vDating-rasgrup[c].colli;
+                    vdat[i]=0;
                     vkap[i]=this.vCap-this.vDating;
                     colli_in_subroute[i]+=this.vDating; 
                     sumC-=this.vDating; 
@@ -1097,7 +1113,7 @@ while(gidx<this.RouteGroup.length){
                         }
                       }
                       //bukan dataran tinggi
-                        else{
+                        else{ 
                       //jika kapasitas truk > demand
                             if(vkap[subrute]>=rasgrup[indexSel].colli){
                               //maka semua demand diantarkan
@@ -1560,8 +1576,9 @@ scheduling(population : any[][][][], datFlag: any[][], fromgud: any[][]){
     for(let j=0;j<population[i].length;j++){
       let newSubrute=[];
       //apakah dataran tinggi?
+      let jarakBefore=0;
       if(!datFlag[i][j]&&population[i][j].length>1){
-        
+        jarakBefore=this.calDistSubRute(population[i][j],fromgud[i][j]);
         //jika bukan dataran tinggi cari dea paling dekat dengan gudang
         let subRute=this.deepCopy(population[i][j]);
         let k=0;
@@ -1610,8 +1627,16 @@ scheduling(population : any[][][][], datFlag: any[][], fromgud: any[][]){
      
         
         }
-        if(newSubrute.length>0)
-     pol[i].push(this.deepCopy(newSubrute));
+        if(newSubrute.length>0){
+          let jarakAfter=this.calDistSubRute(newSubrute,fromgud[i][j]);
+          if(jarakAfter<jarakBefore){
+            // console.log('lebih baik');
+            // console.log(jarakAfter+'_'+jarakBefore);
+          pol[i].push(this.deepCopy(newSubrute));
+          }
+          else
+          pol[i].push(this.deepCopy(population[i][j]));
+        }
      else
      pol[i].push(this.deepCopy(population[i][j]));
         
@@ -1619,6 +1644,24 @@ scheduling(population : any[][][][], datFlag: any[][], fromgud: any[][]){
   }
   return resolve(pol);
   });
+}
+calDistSubRute(subrute:any[][], fgud:number){
+
+    let k=0;
+    let jarak_subroute=0;
+    jarak_subroute+=Number(this.distance[fgud][subrute[k]["index"]+7]) //jarak depot-customer
+    
+    // console.log([route[i][j].length-1]);
+    
+    // console.log(route[i][j][route[i][j].length-1]["index"]+7);
+    // console.log(f_gudang[i][j]);
+    // console.log(subrute[subrute.length-1]);
+    jarak_subroute+=Number(this.distance[subrute[subrute.length-1]["index"]+7][fgud]); //jarak customer-depot
+    while(k<subrute.length-1){//loop sebanyak desa dalam sub route
+      jarak_subroute+=Number(this.distance[subrute[k]["index"]+7][subrute[k+1]["index"]+7]) //jarak depot-customer
+      k++;
+    }
+    return jarak_subroute;
 }
 
 evaluasiClark(pop: any[][][], fgud: any[][]){
@@ -1702,24 +1745,29 @@ selection(route:any[][][][], fitness:number[], f_gud:number[][], subcol: any[][]
   let pcumulative: number[]=[];
   let i=0;
   let x=0
-   
+  //  console.log(fitness);
   //menghitung kumulatif fitness
   while(i<fitness.length){
     x+=fitness[i];
     cumulative[i]=x;
     i++;
   }
+  // console.log(cumulative);
   let j=0;
   //menghitung probability 
   while(j<cumulative.length){
     pcumulative[j]=cumulative[j]/cumulative[cumulative.length-1];
     j++;
   }
+  // console.log(pcumulative);
   //select candidate
   let choosed:number[]=[];
   let k=0;
+  
   while(k<pcumulative.length){
     let rnd=Math.random(); //generate angka random [0,1)
+    // let randomVal=[0.7960147630850072,0.25445883886940335, 0.7986107653779335, 0.0027807857853223705,0.7856157292503474];
+    // rnd=randomVal[k];
     let l=0;
     while(l<pcumulative.length){
       if(rnd>pcumulative[l]){
@@ -1744,6 +1792,7 @@ selection(route:any[][][][], fitness:number[], f_gud:number[][], subcol: any[][]
 //crossover
 
 crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOffs: any[][], fgudangPar:any[][], subcollioffs : any[][], subcollipar: any [][], datOffs: any[][], datPar: any[][], rastra:any[][]){
+  // console.log('Crossover');
   let i=0;
   let newOffs=[];
   let newGud=[];
@@ -1759,10 +1808,17 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
          if(choosed[i]!=randomParent)
           same=false;
        }
+      //  let rparent=[3,2,0,1,1];
+      //  randomParent=rparent[i];
       //  console.log(choosed[i]+"_"+randomParent);
-
+       
        let randomRoute1 = Math.floor(Math.random() * offs[i].length);
        let randomRoute2 = Math.floor(Math.random() * parent[randomParent].length);
+
+      //  let rr1=[5,5,1,3,5];
+      //  let rr2=[5,2,1,5,2];
+      //  randomRoute1=rr1[i];
+      //  randomRoute2=rr2[i];
         // console.log("Route: "+randomRoute1+"_"+randomRoute2);
         // console.log(offs[i][randomRoute1]);
         // console.log(parent[randomParent][randomRoute2]);
@@ -1793,7 +1849,8 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
         let orInd2=this.calDistance(this.deepCopy(parent[randomParent]),this.deepCopy(fgudangPar[randomParent]));
 
         var randNum = Math.random();
-          // console.log(randNum);
+          // let raand=[0.7594149767052774, 0.003940952666833697, 0.49973236574322266, 0.7575797201626049, 0.6679742643282924];
+          // randNum=raand[i];
           if(randNum<this.prob_cross){
         // console.log(this.deepCopy(offs[i]));
         // console.log(this.deepCopy(subcollioffs[i]));
@@ -1816,8 +1873,19 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
                 // console.log(parent1[a][idxr]);
                 subpar1[a]-=parent1[a][idxr]['load'];
                 
+
+
                 parent1[a].splice(idxr,1);
                 
+                if(datflag1[a]){
+                  let changeFlag=false;
+                  let c=0;
+                  while(changeFlag&&c<parent1[a].length){
+                    changeFlag=this.isDataranTinggi(parent1[a][c]['desa'],parent1[a][c]['kecamatan']);
+                    c++;
+                  }
+                  datflag1[a]=changeFlag;
+                }
                 
               }else{
                 idxr++;
@@ -1857,7 +1925,15 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
                 subpar2[a]-=parent2[a][idxr]['load'];
                 
                 parent2[a].splice(idxr,1);
-                
+                if(datflag2[a]){
+                  let changeFlag=false;
+                  let c=0;
+                  while(changeFlag&&c<parent2[a].length){
+                    changeFlag=this.isDataranTinggi(parent2[a][c]['desa'],parent2[a][c]['kecamatan']);
+                    c++;
+                  }
+                  datflag2[a]=changeFlag;
+                }
                 
               }else{
                 idxr++;
@@ -1884,6 +1960,7 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
           // console.log('c1');
             //masukkan cust ke sub route
             for(let a=0;a<listRoute2.length;a++){ //loop sebanyak cust
+              // console.log(listRoute2[a]);
               let sum=rastra[listRoute2[a]]['colli'];
               if(!this.isDataranTinggi(rastra[listRoute2[a]]['desa'], rastra[listRoute2[a]]['kecamatan'])){
 
@@ -2010,7 +2087,7 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
              
             }
             else{
-              // console.log('dating1');
+              console.log('dating1');
                // console.log(sum);
               let feaInsert1=[];
                 //parent 1
@@ -2128,7 +2205,7 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
                   //check diaasign ke yang mana berdasarkan jarak terkecil
                   let idx=this.checkLeastDist(listRoute1[a],this.deepCopy(parent2[feaInsert2[b]]),fgudangPar[randomParent][randomRoute1]);
                   
-                  // console.log(feaInsert1[b]);
+                  // console.log(feaInsert2[b]);
                   // console.log(parent1[feaInsert1[b]]);
                   let r=[];
                    r["index"]=rastra[listRoute1[a]]['$key'];
@@ -2220,7 +2297,7 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
                    parent2[parent2.length-1].push(r);
                    subpar2.push(this.vCap);
                    datflag2.push(false);
-                   fgud2.push(fgudangPar[randomParent][randomRoute1]);
+                   fgud2.push(fgudangOffs[i][randomRoute1]);
 
                   }
                   else{
@@ -2229,7 +2306,7 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
                    parent2[parent2.length-1].push(r);
                     subpar2.push(sum);
                     datflag2.push(false);
-                   fgud2.push(fgudangPar[randomParent][randomRoute1]);
+                   fgud2.push(fgudangOffs[i][randomRoute1]);
                    sum-=sum;
                   }
                   // console.log(r);
@@ -2239,7 +2316,7 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
              
             }
             else{
-              // console.log('dating2');
+              console.log('dating2');
                // console.log(sum);
               let feaInsert2=[];
                 //parent 2
@@ -2258,7 +2335,7 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
                   //check diaasign ke yang mana berdasarkan jarak terkecil
                   let idx=parent1[feaInsert2[b]].length;
                   
-                  // console.log(feaInsert1[b]);
+                  // console.log(feaInsert2[b]);
                   // console.log(parent1[feaInsert1[b]]);
                   let r=[];
                    r["index"]=rastra[listRoute1[a]]['$key'];
@@ -2312,7 +2389,7 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
                    parent2[parent2.length-1].push(r);
                    subpar2.push(this.vDating);
                    datflag2.push(true);
-                   fgud2.push(fgudangPar[randomParent][randomRoute1]);
+                   fgud2.push(fgudangOffs[i][randomRoute1]);
 
                   }
                   else{
@@ -2321,7 +2398,7 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
                    parent2[parent2.length-1].push(r);
                     subpar2.push(sum);
                     datflag2.push(true);
-                   fgud2.push(fgudangPar[randomParent][randomRoute1]);
+                   fgud2.push(fgudangOffs[i][randomRoute1]);
                    sum-=sum;
                   }
                   // console.log(r);
@@ -2330,13 +2407,16 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
               }
             }
           }
+          // console.log(this.deepCopy(fgud1));
+
+          // console.log(this.deepCopy(fgud2));
           let indv1=this.calDistance(this.deepCopy(parent1),this.deepCopy(fgud1));
           let indv2=this.calDistance(this.deepCopy(parent2),this.deepCopy(fgud2));
           // console.log(orInd1);
           // console.log(orInd2);
           // console.log(indv1);
           // console.log(indv2);
-          if(indv1>orInd1 && indv2>orInd1 && orInd1<orInd2){
+          if(indv1>orInd1 && indv2>orInd1 && orInd1<=orInd2){
             // console.log('orpar1');
             newOffs.push(this.deepCopy(offs[i]));
             newGud.push(this.deepCopy(fgudangOffs[i]));
@@ -2398,7 +2478,11 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
     list.splice(0,0,cust);
     let minJarak=0;
     let selectedIdx=0;
-    //console.log(list[0]);
+    if(list[0]==undefined){
+      console.log(gudf);
+      console.log(list[0]);
+    }
+    
     minJarak+=Number(this.distance[gudf][list[0]+7]) //jarak depot-customer
     
     minJarak+=Number(this.distance[list[list.length-1]+7][gudf]) //jarak customer-depot
@@ -2460,8 +2544,11 @@ mutation(offs: any[][][], fgudang: any[][], subcol: any[][], datFlag:any[][]){
   
   for(let i=0;i<offs.length;i++){
       var randNum = Math.random();
+      // let ranMut=[0.8420177079802431, 0.09089368637028095, 0.6700244426744686, 0.2203473916288734, 0.3545417872432999 ];
+      // randNum=ranMut[i];
       // console.log(randNum);
       if(randNum<this.prob_mutation){
+        // console.log('Mutation');
         // console.log(this.deepCopy(offs[i]));
         // console.log(this.deepCopy(subcol[i]));
         // console.log('disb_'+this.calDistance(this.deepCopy(offs[i]),this.deepCopy(fgudang[i])));
@@ -2469,6 +2556,9 @@ mutation(offs: any[][][], fgudang: any[][], subcol: any[][], datFlag:any[][]){
 
         //memilih depot yang dilakukanmutasi secara random
         var randomDepot = Math.floor(Math.random() * fgudang[i].length);
+        // randomDepot=5;
+        // console.log(randomDepot);
+
         //masukkan route non dating pada depot yang sama ke dalam array x
         let gudangRnd=fgudang[i][randomDepot];
         let selRoute=[];
@@ -2481,14 +2571,16 @@ mutation(offs: any[][][], fgudang: any[][], subcol: any[][], datFlag:any[][]){
         //pilih dua cut point dr array tersebut
         var cut2 = Math.floor(Math.random() * selRoute.length);
         var cut1 = Math.floor(Math.random() * cut2);
-        
+        // cut1=1;
+        // cut2=3;
         if(cut1!=cut2){
           // console.log(cut1);
           // console.log(cut2);
            let cutInside1=Math.floor(Math.random() * offs[i][selRoute[cut1]].length);
            let cutInside2=Math.floor(Math.random() * offs[i][selRoute[cut2]].length);
           //hapus rute yang terpilih dr individu.
-          
+          // cutInside1=0;
+          // cutInside2=0;
           // console.log(cutInside1);
           // console.log(cutInside2);
           let custHead=[];
@@ -2502,34 +2594,44 @@ mutation(offs: any[][][], fgudang: any[][], subcol: any[][], datFlag:any[][]){
                 s+=offs[i][selRoute[b]][c]['load'];
                 if(b==cut1 && c<=cutInside1){
                   custHead.push(this.deepCopy(offs[i][selRoute[b]][c]));
+                  
+              
                 }
                 else 
                 if(b==cut2 && c>=cutInside2){
                   custTail.push(this.deepCopy(offs[i][selRoute[b]][c]));
+                  
+                   
                 }
-                else{
+                else
+                {
                   custPop.push(this.deepCopy(offs[i][selRoute[b]][c]));
+                  
                 }
               
               
               }
+              
               offs[i][selRoute[b]]=[];
+              
             }
           }
         //   console.log(s);
         //  console.log(this.deepCopy(offs[i]));
           for(let b=0;b<offs[i].length;b++){
-            
-              if(offs[i][b].length==0){
+                        
+              if(offs[i][b].length==0 ){
               offs[i].splice(b,1);
               fgudang[i].splice(b,1);
               subcol[i].splice(b,1);
               datFlag[i].splice(b,1);
               b--;
-              
-              
-              
             }
+            
+            
+            
+            
+            
           }
           // console.log(this.deepCopy(custHead));
           // console.log(this.deepCopy(custPop));
@@ -2608,6 +2710,23 @@ mutation(offs: any[][][], fgudang: any[][], subcol: any[][], datFlag:any[][]){
             fgudang[i].push(gudangRnd);
             subcol[i].push(subInver[a]);
             datFlag[i].push(false);
+          }
+          // console.log(this.deepCopy(offs[i]));
+          // repairing same desa
+          for(let a=0; a<offs[i].length;a++){
+            for(let b=0; b<offs[i][a].length;b++){
+              //cari yang sama
+             
+              let c=b+1;
+              while(c<offs[i][a].length){
+                if(offs[i][a][b]['index']==offs[i][a][c]['index']){
+                  offs[i][a][b]['load']+=offs[i][a][c]['load'];
+                  offs[i][a].splice(c,1);
+                  c--;
+                }
+                c++;
+              }
+            }
           }
           // console.log(this.deepCopy(offs[i]));
           // console.log(this.deepCopy(fgudang[i]));

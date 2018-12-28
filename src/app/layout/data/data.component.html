@@ -3,9 +3,14 @@
 <div [@routerTransition]>
     
     <app-page-header [heading]="'Data'" [icon]="'fa-table'"> </app-page-header>
-    
+    <jqxLoader #jqxLoader
+                            [text]="'Please wait for about a minutes...'"
+                            [width]="300"
+                            [height]="70">
+                    </jqxLoader>
 
      <div class="card mb-3" >
+         
          <div class="row" style="padding:10px">
         <div class="col-sm-7" >
             <div class="card-header" style="background-color: white;border-bottom-color: white">

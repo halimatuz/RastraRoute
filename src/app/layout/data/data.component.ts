@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { routerTransition } from '../../router.animations';
 
 import { RastraService } from '../../shared/services/rastra/rastra.service';
 import { Rastra } from '../../shared/services/rastra/rastra.model';
+import { jqxLoaderComponent } from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxloader';
 
 import * as XLSX from 'xlsx';
 
@@ -13,6 +14,7 @@ import * as XLSX from 'xlsx';
     animations: [routerTransition()]
 })
 export class DataComponent implements OnInit {
+  @ViewChild('jqxLoader') jqxLoader: jqxLoaderComponent;
      data:any[];
     source: any ;
     rastra : any [];
@@ -31,6 +33,8 @@ export class DataComponent implements OnInit {
 
     }
     ngOnInit() {
+      // console.log(this.jqxLoader);
+
     var x = this.rastraService.getData();
         x.snapshotChanges().subscribe(item => {
       this.rastraList= [];
@@ -40,7 +44,7 @@ export class DataComponent implements OnInit {
         this.rastraList.push(y as Rastra);
       });
       //load data into table
-      console.log(this.rastraList);
+      // console.log(this.rastraList);
       this.source =
         {
         localData: this.rastraList,
@@ -55,10 +59,12 @@ export class DataComponent implements OnInit {
         ]
     };
     this.dataAdapter=new jqx.dataAdapter(this.source);
+    // this.jqxLoader.close();
     });
     
     }
     uploadData(evt: any) : void { 
+     
     // get data from file upload       
     const target: DataTransfer = <DataTransfer>(evt.target);
     if (target.files.length !== 1) throw new Error('Cannot use multiple files');
@@ -83,6 +89,7 @@ export class DataComponent implements OnInit {
       
       //remove past data and replaced with new one
       this.rastraService.removeData();
+      console.log(this.rastra);
       //insert the new data
       for(let i=0;i<this.rastra.length;i++){
        this.onCreate(this.rastra[i]);
@@ -93,6 +100,7 @@ export class DataComponent implements OnInit {
     };
     
     reader.readAsBinaryString(target.files[0]);
+     
 }
 changetoRastra(x : any[],index:number){
 let arr= new Rastra ();
@@ -101,6 +109,7 @@ arr['kabupaten']=x[0];
 arr['kecamatan']=x[1];
 arr['desa']=x[2];
 arr['colli']=x[3];
+arr['idx']=index;
 this.rastra.push(arr);
 }
 onCreate(x:Rastra) {
