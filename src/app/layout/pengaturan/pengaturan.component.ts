@@ -11,6 +11,7 @@ import { Rastra } from '../../shared/services/rastra/rastra.model';
 
 import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { Genalgov2Service } from '../../shared/services/route/genalgov2.service';
 
 
 @Component({
@@ -30,7 +31,8 @@ constructor(
   private gudangService: GudangService, 
   private dataranTinggiService: DataranTinggiService,  
   private rastraService: RastraService, 
-  private tostr: ToastrService
+  private tostr: ToastrService,
+  private gen2 : Genalgov2Service,
   ){
     }
     ngOnInit() {
@@ -73,6 +75,14 @@ constructor(
             this.gudangService.updateEmployee(employeeForm.value);
             this.resetForm(employeeForm);
             this.tostr.success('Berhasil Diedit !', 'Data Gudang');
+            this.gen2.cekStok().then(res =>{
+              if(res){
+                this.tostr.error('Kapasitas Gudang tidak Mencukupi!', 'Error');
+              }
+              else{
+                this.tostr.success('Kapasitas Gudang Mencukupi !', 'Success');
+              }
+            })
         }
         else
         this.tostr.error('Kapasitas Gudang terlalu kecil dari stok!', 'Error');
