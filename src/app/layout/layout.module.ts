@@ -11,6 +11,7 @@ import { HeaderComponent } from './components/header/header.component';
 import { jqxDataTableComponent} from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxdatatable';
 import { jqxChartComponent } from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxchart';
 import { jqxLoaderComponent } from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxloader';
+import { jqxFileUploadComponent } from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxfileupload';
 
 import { FormsModule} from '@angular/forms';
 
@@ -30,13 +31,15 @@ import { FormsModule} from '@angular/forms';
         HeaderComponent,
         jqxDataTableComponent,
         jqxChartComponent,
-        jqxLoaderComponent
+        jqxLoaderComponent,
+        jqxFileUploadComponent
         ],
     exports: [
         jqxDataTableComponent,
         jqxChartComponent,
         jqxLoaderComponent,
         FormsModule,
+        jqxFileUploadComponent,
 
         
         

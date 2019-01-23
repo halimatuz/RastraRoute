@@ -28,7 +28,7 @@ export class PengaturanComponent implements OnInit {
     rastraList: Rastra[];
     listdat: string[][];
 constructor(
-  private gudangService: GudangService, 
+  public gudangService: GudangService, 
   private dataranTinggiService: DataranTinggiService,  
   private rastraService: RastraService, 
   private tostr: ToastrService,

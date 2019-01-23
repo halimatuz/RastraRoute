@@ -20,7 +20,9 @@ import { AuthService } from './shared/guard/auth.service';
 import { UserResolver } from './shared/guard/user.resolver';
 import { UserService } from './shared/guard/user.service';
 import { ToastrModule } from 'ngx-toastr';
-
+import { jqxDataTableComponent} from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxdatatable';
+import { jqxChartComponent } from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxchart';
+import { jqxLoaderComponent } from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxloader';
 
 
 // AoT requires an exported function for factories

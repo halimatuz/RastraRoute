@@ -88,9 +88,9 @@ export class PengujianComponent implements OnInit {
      initTime=0;
 constructor(
     private tostr: ToastrService, 
-    private gen : GenalgoService,
+    public gen : GenalgoService,
     private gen2 : Genalgov2Service,
-    private ujiService: UjiService,
+    public ujiService: UjiService,
     ){
         this.gen.getRoute2016();
         this.gen.getRoute2017();
