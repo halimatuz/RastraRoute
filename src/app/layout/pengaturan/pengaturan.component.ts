@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit ,ViewChild} from '@angular/core';
 import { routerTransition } from '../../router.animations';
 import { GudangService } from '../../shared/services/gudang/gudang.service';
 import { Gudang } from '../../shared/services/gudang/gudang.model';
@@ -12,7 +12,7 @@ import { Rastra } from '../../shared/services/rastra/rastra.model';
 import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Genalgov2Service } from '../../shared/services/route/genalgov2.service';
-
+import { jqxLoaderComponent } from 'jqwidgets-scripts/jqwidgets-ts/angular_jqxloader';
 
 @Component({
     selector: 'app-pengaturan',
@@ -21,12 +21,14 @@ import { Genalgov2Service } from '../../shared/services/route/genalgov2.service'
     animations: [routerTransition()]
 })
 export class PengaturanComponent implements OnInit {
-    
+ @ViewChild('jqxLoader_2') jqxLoader_2: jqxLoaderComponent;
+
     public searchString: string;
     gudangList: Gudang[];
     dataranList: DataranTinggi[];
     rastraList: Rastra[];
     listdat: string[][];
+  
 constructor(
   public gudangService: GudangService, 
   private dataranTinggiService: DataranTinggiService,  
@@ -34,6 +36,7 @@ constructor(
   private tostr: ToastrService,
   private gen2 : Genalgov2Service,
   ){
+    
     }
     ngOnInit() {
       //read gudang
@@ -66,8 +69,11 @@ constructor(
     });
    this.loadRastra();
     this.resetForm();
-    }
+  }
+
     onSubmit(employeeForm: NgForm) {
+   
+      
     if (employeeForm.value.$key == null)
       this.tostr.info('Data Gudang yang Diedit !', 'Silahkan Memilih');
     else{
@@ -78,9 +84,11 @@ constructor(
             this.gen2.cekStok().then(res =>{
               if(res){
                 this.tostr.error('Kapasitas Gudang tidak Mencukupi!', 'Error');
+             
               }
               else{
                 this.tostr.success('Kapasitas Gudang Mencukupi !', 'Success');
+                
               }
             })
         }
@@ -124,7 +132,9 @@ constructor(
     }
   }
   onEdit(emp: Gudang) {
+    
     this.gudangService.selectedGudang = Object.assign({}, emp);
+    
   }
  
   onDelete(key: string) {

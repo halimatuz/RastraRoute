@@ -4,11 +4,16 @@
     
     <app-page-header [heading]="'Pengaturan'" [icon]="'fa-table'"> </app-page-header>
     
-
+  <jqxLoader #jqxLoader_2
+                            [text]="'Please wait for about several minutes...'"
+                            [width]="300"
+                            [height]="70">
+                    </jqxLoader>
      
        
         
             <div class="row">
+                
                  <div class="col-sm-6">
                     <div class="card mb-3" >
          
@@ -45,6 +50,7 @@
                             </form>
                     </div>
                 </div>
+ 
                 <div class="col-sm-6">
                     <div class="card mb-3" >
          <div class="card-body table-responsive">

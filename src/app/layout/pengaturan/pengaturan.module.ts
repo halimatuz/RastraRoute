@@ -7,14 +7,13 @@ import { PageHeaderModule } from './../../shared';
 import { HttpClientModule } from '@angular/common/http';
 import { LayoutModule } from '../layout.module';
 import { FilterPipe } from './filter.pipe';
-
 @NgModule({
     imports: [
         CommonModule, 
         PengaturanRoutingModule, 
         PageHeaderModule, 
         HttpClientModule,
-        LayoutModule,
+        LayoutModule
         
         
 

@@ -10,7 +10,6 @@ import { Gudang } from '../../shared/services/gudang/gudang.model';
 import { RouteService } from '../../shared/services/route/route.service';
 import { Route } from '../../shared/services/route/route.model';
 import { Genalgov2Service } from '../../shared/services/route/genalgov2.service';
-
 @Component({
     selector: 'app-hasil',
     templateUrl: './hasil.component.html',
@@ -109,8 +108,9 @@ export class HasilComponent implements OnInit {
         this.myDataTable.exportData('xls');
     }
     calculate(){
+       if(this.gen2.rastraGroup){
        this.jqxLoader.open();
-        this.gen2.GA(50,100,0.6,0.01)
+        this.gen2.GA_withoutInitial(5,10,0.6,0.01)
         .then(res =>{
             console.log(res);
             this.routeService.removeData();
@@ -124,6 +124,24 @@ export class HasilComponent implements OnInit {
 
             this.jqxLoader.close();
         });
+       }else{
+           this.jqxLoader.open();
+        this.gen2.GA_withInitial(5,10,0.6,0.01)
+        .then(res =>{
+            console.log(res);
+            this.routeService.removeData();
+            for(let i=0; i<res[1].length; i++){
+                let x=new Route();
+                x.fgudang=res[2][i];
+                x.index=i;
+                x.subRoute=res[1][i];
+                this.routeService.insertEmployee(x);
+            }
+
+            this.jqxLoader.close();
+        });
+       }
+        
     }
     onChange(val :any){
         if(val!="all"){

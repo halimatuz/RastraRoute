@@ -64,7 +64,7 @@ export class DataComponent implements OnInit {
     
     }
     uploadData(evt: any) : void { 
-     
+    //  this.jqxLoader.open();
     // get data from file upload       
     const target: DataTransfer = <DataTransfer>(evt.target);
     if (target.files.length !== 1) throw new Error('Cannot use multiple files');

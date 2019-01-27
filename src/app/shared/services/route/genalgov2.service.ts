@@ -57,7 +57,100 @@ distance:any[][]; //data jarak
  
 }
 //loop GA
-GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
+GA_withoutInitial(numberPop:number, numberGen: number, Pc:number, Pm: number){
+  return new Promise((resolve,reject) =>{
+  
+   this.InitializeDistance()
+  .then(res =>{
+     if(!res){
+      this.AssignSingleCust()
+      // this.rastraGroup=this.deepCopy(rasgroup);
+    console.log(this.deepCopy(this.rastraGroup));
+    // console.log(this.deepCopy(this.RouteGroup));
+    this.matrixSavings(this.deepCopy(this.rastraGroup),this.deepCopy(this.distance));
+    let i=0;
+    while(i<numberPop){
+      console.log(i);
+      
+      let x=this.Routing(i);
+      // console.log(x);
+      this.populasi.push(x[0]);
+      this.fromG.push(x[1]);
+      this.info_Col.push(x[2]);
+      this.info_dating.push(x[3]);
+      
+      i++;
+    }
+      // let jarak=this.evaluasiClark(this.populasi,this.fromG);
+      // console.log(jarak);
+    return this.scheduling(this.deepCopy(this.populasi),this.deepCopy(this.info_dating), this.deepCopy(this.fromG));
+     }
+     else{
+      console.log('Tidak Cukup');
+     }
+  })
+  .then(res =>{
+     if(res){
+      this.populasi=this.deepCopy(res);
+      // console.log(this.deepCopy(this.populasi));
+      // console.log(this.deepCopy(this.info_Col));
+      let jarak=this.evaluasiClark(this.populasi,this.fromG);
+      // console.log(jarak);
+      let a=this.minVal(this.deepCopy(jarak));
+      let elite=a[0];
+      let eliteidx=a[1];
+      let histElite: number []=[];
+      let idx=0;
+      let pop=this.deepCopy(this.populasi);
+      let fromGud=this.deepCopy(this.fromG);
+      let subCol=this.deepCopy(this.info_Col);
+      let datF=this.deepCopy(this.info_dating);
+      let individu:any[][][]=this.deepCopy(this.populasi[a[1]]);
+      let fgudang : number[]=this.deepCopy(this.fromG[a[1]]);
+     
+      while(idx<this.numIter){
+        console.log("iter : "+idx);
+      let y=this.calculateFitness(this.deepCopy(jarak));
+      let sel=this.selection(this.deepCopy(pop),this.deepCopy(y),this.deepCopy(fromGud),this.deepCopy(subCol), this.deepCopy(datF) );
+      // console.log(sel);
+      let cross=this.crossover(this.deepCopy(sel[0]), this.deepCopy(sel[1]), this.deepCopy(pop),  this.deepCopy(sel[2]), this.deepCopy(fromGud), this.deepCopy(sel[3]), this.deepCopy(subCol), this.deepCopy(sel[4]), this.deepCopy(datF), this.deepCopy(this.rastra) );
+      // console.log(cross);
+      let mut=this.mutation(this.deepCopy(cross[0]),this.deepCopy(cross[1]),this.deepCopy(cross[2]),this.deepCopy(cross[3]));
+      // console.log(mut);
+      pop=this.deepCopy(mut[0]);
+      fromGud=this.deepCopy(mut[1]);
+      subCol=this.deepCopy(mut[2]);
+      datF=this.deepCopy(mut[3]);
+      jarak=this.evaluasiClark(pop,fromGud);
+      let val=this.minVal(this.deepCopy(jarak));
+      histElite[idx]=elite;
+      if(elite>val[0]){
+        elite=val[0];
+        eliteidx=val[1];
+        let ind=this.deepCopy(mut[0]);
+        individu=ind[eliteidx];
+        let gud=this.deepCopy(mut[1]);
+        fgudang=gud[eliteidx];
+        // console.log('fgud: '+idx);
+        // console.log(gud[eliteidx]);
+        
+      }
+      idx++;
+    }
+    console.log(histElite);
+    console.log(elite);
+    console.log(fgudang);
+    console.log(individu);
+      
+     return resolve([histElite,individu, fgudang]);
+     }
+   
+    
+    
+  })
+  });
+}
+GA_withInitial(numberPop:number, numberGen: number, Pc:number, Pm: number){
   return new Promise((resolve,reject) =>{
   this.distance=[]; //data jarak
   this.rastra=[];  //data kelurahan dan colli
@@ -116,7 +209,8 @@ GA(numberPop:number, numberGen: number, Pc:number, Pm: number){
   .then(res =>{
      if(!res){
       this.AssignSingleCust();
-    // console.log(this.deepCopy(this.rastraGroup));
+      // this.rastraGroup=this.deepCopy(rasgroup);
+    console.log(this.deepCopy(this.rastraGroup));
     // console.log(this.deepCopy(this.RouteGroup));
     this.matrixSavings(this.deepCopy(this.rastraGroup),this.deepCopy(this.distance));
     let i=0;

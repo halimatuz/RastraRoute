@@ -206,6 +206,7 @@ calculate(){
     }
   }
   onEdit(emp: Uji) {
+    
     this.ujiService.selectedUji = Object.assign({}, emp);
   }
  
