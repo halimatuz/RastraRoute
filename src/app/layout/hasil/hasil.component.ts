@@ -110,7 +110,7 @@ export class HasilComponent implements OnInit {
     calculate(){
        if(this.gen2.rastraGroup){
        this.jqxLoader.open();
-        this.gen2.GA_withoutInitial(5,10,0.6,0.01)
+        this.gen2.GA_withoutInitial(50,100,0.6,0.01)
         .then(res =>{
             console.log(res);
             this.routeService.removeData();
@@ -126,7 +126,7 @@ export class HasilComponent implements OnInit {
         });
        }else{
            this.jqxLoader.open();
-        this.gen2.GA_withInitial(5,10,0.6,0.01)
+        this.gen2.GA_withInitial(50,100,0.6,0.01)
         .then(res =>{
             console.log(res);
             this.routeService.removeData();

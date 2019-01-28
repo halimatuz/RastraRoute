@@ -62,7 +62,7 @@ GA_withoutInitial(numberPop:number, numberGen: number, Pc:number, Pm: number){
   
    this.InitializeDistance()
   .then(res =>{
-     if(!res){
+     if(res){
       this.AssignSingleCust()
       // this.rastraGroup=this.deepCopy(rasgroup);
     console.log(this.deepCopy(this.rastraGroup));
@@ -298,60 +298,9 @@ GA_withInitial(numberPop:number, numberGen: number, Pc:number, Pm: number){
 //generate initial populasi
 GenInitialPop(numberPop:number){
   return new Promise((resolve,reject) =>{
-  this.distance=[]; //data jarak
-  this.rastra=[];  //data kelurahan dan colli
-  this.gudang=[]; //data stok
-  this.dataran =[]; //data dataran tinggi
-  this.route=[]; //data rute yang dihasilkan
-  this.f_gudang=[]; //data gudang asal rute diantarkan
-  this.sum_colli=0; //data jumlah colli yang diantarkan
-  this.sub_colli=[];//data jumlah colli tiap sub route
-  this.rastraGroup=[];
-  this.sumGroup=[];
-  this.RouteGroup=[];
-  this.populasi=[];
-  this.populasi_fit=[];
-  this.fromG=[];
-  this.subCol=[];
-  this.Dating_Flag=[];
-  this.info_Col=[];
-  this.info_dating=[];
-  
    this.InitializeDistance()
   .then(res =>{
-    if(res){
-      //console.log(this.distance);
-      
-      return this.InitializeRastra();
-    }
-  })
-  .then(res =>{
-    if(res){
-      
-      //console.log(this.rastra);
-      
-      //console.log(this.sum_colli);
-      return this.InitializeGudang();
-    }
-  })
-  .then(res =>{
-     if(res)
-    // console.log(this.gudang.length);
-    // console.log(this.gudang);
-   
-    
-    
-    return this.InitializeDataran();
-
-  })
-  .then(res =>{
-     if(res)
-   return this.groupingCust( this.deepCopy(this.rastra));
-    
-    
-  })
-  .then(res =>{
-     if(!res){
+     if(res){
       this.AssignSingleCust();
     // console.log(this.deepCopy(this.rastraGroup));
     this.matrixSavings(this.deepCopy(this.rastraGroup),this.deepCopy(this.distance));
@@ -592,6 +541,7 @@ cekStok(){
   })
    .then(res =>{
   if(!res){
+    console.log(this.rastraGroup);
   return resolve(false);//jika  cukup maka false
   }
   else
@@ -1799,6 +1749,7 @@ scheduling(population : any[][][][], datFlag: any[][], fromgud: any[][]){
         
     }
   }
+  // console.log([pol,fromgud,datFlag]);
   return resolve(pol);
   });
 }
@@ -1941,7 +1892,7 @@ selection(route:any[][][][], fitness:number[], f_gud:number[][], subcol: any[][]
     infoDat.push(datFlag[l]);
     k++;
   }
-
+//  console.log([choosed,offs,f_gudang, infoDat]);
   return [offs,choosed,f_gudang, infoCol, infoDat];
 
 }
@@ -2621,6 +2572,7 @@ crossover(offs : any[][][][], choosed :number[], parent: any[][][][], fgudangOff
   // console.log(newGud);
   // console.log(newsub);
   // console.log(newdatFlag);
+  // console.log([newOffs, newGud, newdatFlag]);
  return [newOffs, newGud, newsub, newdatFlag];
   
   
@@ -2896,6 +2848,7 @@ mutation(offs: any[][][], fgudang: any[][], subcol: any[][], datFlag:any[][]){
       }
       }
   }
+  // console.log([offs, fgudang, datFlag]);
   return [offs, fgudang, subcol, datFlag];
 
 }
